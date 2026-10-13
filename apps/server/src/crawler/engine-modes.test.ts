@@ -56,4 +56,19 @@ describe('Crawler sitemap', () => {
       expect(final).toBe('done');
     } finally { await site.close(); }
   });
+
+  it('при respectRobots=false всё равно находит sitemap через robots.txt', async () => {
+    // Каноническая карта фикстуры лежит на нестандартном пути /sitemaps/index.xml,
+    // известном только из Sitemap-директивы robots.txt. Дефолтный /sitemap.xml отдаёт
+    // другой urlset (only-from-fallback). Если бы движок не фетчил robots.txt в этом
+    // режиме, он бы споткнулся о фоллбек — и only-from-fallback попал бы в результаты.
+    const site = await startTestSite();
+    try {
+      const { pages, final } = await run(site.origin, opts(site.origin, { mode: 'sitemap', respectRobots: false }));
+      const urls = pages.map((p) => p.url).sort();
+      expect(urls).toEqual([site.origin + '/', site.origin + '/about'].sort());
+      expect(urls.some((u) => u.endsWith('only-from-fallback'))).toBe(false);
+      expect(final).toBe('done');
+    } finally { await site.close(); }
+  });
 });

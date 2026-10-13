@@ -54,7 +54,9 @@ export class Crawler {
     if (this.started) return;
     this.started = true;
     this.origin = new URL(this.options.startUrl).origin;
-    if (this.options.respectRobots) {
+    // robots.txt фетчим всегда в sitemap-режиме (ради авто-обнаружения Sitemap-директивы) и при respectRobots.
+    // allowed() при respectRobots=false не применяется — см. robotsAllowed().
+    if (this.options.respectRobots || this.options.mode === 'sitemap') {
       this.robots = await fetchRobots(this.origin, this.options.requestTimeoutMs);
     }
     this.followLinks = this.options.mode === 'spider';
@@ -119,7 +121,8 @@ export class Crawler {
     this.throttlePromise = (async (): Promise<void> => {
       if (prev) await prev;
       const wait = this.lastFetchStart + delay - Date.now();
-      if (wait > 0) await sleep(wait);
+      // +5мс запаса: страхует от джиттера таймера/Date.now() — интервал строго >= crawlDelayMs.
+      await sleep(Math.max(0, wait + 5));
       this.lastFetchStart = Date.now();
     })();
     await this.throttlePromise;

@@ -74,6 +74,18 @@ function sitemapXml(origin: string): string {
   ].join('\n');
 }
 
+// Отличающийся urlset на дефолтном пути /sitemap.xml: он служит фоллбеком движка.
+// Если sitemap-режим нашёл карту через robots.txt, в результатах не будет
+// only-from-fallback — это честно отличает авто-обнаружение от жёсткого фоллбека.
+function fallbackSitemapXml(origin: string): string {
+  return [
+    '<?xml version="1.0" encoding="UTF-8"?>',
+    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+    `<url><loc>${origin}/only-from-fallback</loc></url>`,
+    '</urlset>',
+  ].join('\n');
+}
+
 export async function startTestSite(port = 0, options: TestSiteOptions = {}): Promise<TestSite> {
   let origin = '';
 
@@ -117,11 +129,17 @@ export async function startTestSite(port = 0, options: TestSiteOptions = {}): Pr
           ? `Crawl-delay: ${options.crawlDelaySeconds}\n`
           : '';
         res.writeHead(200, { 'content-type': 'text/plain; charset=utf-8' });
-        res.end(`User-agent: *\nAllow: /\nDisallow: /private/\n${crawlDelayLine}Sitemap: ${origin}/sitemap.xml\n`);
+        res.end(`User-agent: *\nAllow: /\nDisallow: /private/\n${crawlDelayLine}Sitemap: ${origin}/sitemaps/index.xml\n`);
         break;
-      case '/sitemap.xml':
+      // Каноническая карта: доступна только через robots.txt (нестандартный путь).
+      case '/sitemaps/index.xml':
         res.writeHead(200, { 'content-type': 'application/xml; charset=utf-8' });
         res.end(sitemapXml(origin));
+        break;
+      // Дефолтный фоллбек-путь движка — заведомо другой urlset.
+      case '/sitemap.xml':
+        res.writeHead(200, { 'content-type': 'application/xml; charset=utf-8' });
+        res.end(fallbackSitemapXml(origin));
         break;
       default:
         res.writeHead(404, { 'content-type': 'text/plain; charset=utf-8' });

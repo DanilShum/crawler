@@ -21,7 +21,7 @@ describe('fetchRobots', () => {
     try {
       const info = await fetchRobots(site.origin, 5000);
       expect(info.allowed(`${site.origin}/`)).toBe(true);
-      expect(info.sitemaps).toContain(`${site.origin}/sitemap.xml`);
+      expect(info.sitemaps).toContain(`${site.origin}/sitemaps/index.xml`);
     } finally {
       await site.close();
     }
