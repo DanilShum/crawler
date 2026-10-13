@@ -2,7 +2,6 @@ import { describe, it, expect } from 'vitest';
 import { startTestSite } from '../test-helpers/test-site';
 import { NoNetworkFetcher } from '../test-helpers/no-network-fetcher';
 import { Crawler } from './engine';
-import { HttpFetcher } from './fetcher';
 import type { Fetcher } from './fetcher';
 import type { CrawlOptions, PageResult } from '@seo-crawler/shared';
 
@@ -104,8 +103,10 @@ describe('Crawler spider', () => {
     const site = await startTestSite(0, { crawlDelaySeconds: 0.15 });
     try {
       // Обёртка-рекордер замеряет моменты стартов fetch (гейт срабатывает до вызова fetcher'а).
+      // Делегирует в NoNetworkFetcher: '/' парсится как HTML, и его внешняя ссылка
+      // (https://external.example/) запускает check-запрос даже в list-режиме — он не должен идти в DNS.
       const starts: number[] = [];
-      const inner = new HttpFetcher();
+      const inner = new NoNetworkFetcher();
       const recording: Fetcher = {
         fetch: async (url, timeout) => {
           starts.push(Date.now());
@@ -113,7 +114,6 @@ describe('Crawler spider', () => {
         },
         close: () => inner.close(),
       };
-      // list-режим без внешних ссылок: тест самодостаточен, DNS наружу не трогает.
       const crawler = new Crawler(
         opts(site.origin, {
           mode: 'list',
