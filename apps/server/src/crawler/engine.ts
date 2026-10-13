@@ -4,6 +4,7 @@ import { fetchRobots } from './robots';
 import type { RobotsInfo } from './robots';
 import { fetchSitemapUrls } from './sitemap';
 import type { CrawlOptions, PageResult, HeadingLevel } from '@seo-crawler/shared';
+import { createFetcher } from './rendered-fetcher';
 import type { Fetcher } from './fetcher';
 
 export type EngineEvent =
@@ -33,7 +34,7 @@ export class Crawler {
   private finished = false;
   private inFlight = 0;
 
-  constructor(options: CrawlOptions, fetcher: Fetcher, emit: (e: EngineEvent) => void) {
+  constructor(options: CrawlOptions, fetcher: Fetcher = createFetcher(options.renderJs), emit: (e: EngineEvent) => void) {
     this.options = options;
     this.fetcher = fetcher;
     this.emit = emit;
@@ -199,7 +200,8 @@ export class Crawler {
       fetchedAt: new Date().toISOString(),
       responseTimeMs: o.responseTimeMs,
       sizeBytes: o.sizeBytes,
-      rendered: false,
+      // renderJs известен движку из опций: страницы, собранные через Playwright, помечаем rendered
+      rendered: this.options.renderJs,
       title: null,
       description: null,
       metaRobots: null,
