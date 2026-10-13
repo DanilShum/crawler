@@ -12,7 +12,8 @@ export function parseRobots(robotsUrl: string, body: string): RobotsInfo {
   return {
     // Нет совпавшего правила (undefined) — по robots spec URL разрешён
     allowed: (url: string) => robots.isAllowed(url) ?? true,
-    crawlDelayMs: typeof crawlDelay === 'number' ? crawlDelay : null,
+    // robots-parser отдаёт Crawl-delay в секундах — контракт требует миллисекунды
+    crawlDelayMs: typeof crawlDelay === 'number' ? crawlDelay * 1000 : null,
     sitemaps: robots.getSitemaps(),
   };
 }

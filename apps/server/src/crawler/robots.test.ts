@@ -8,6 +8,11 @@ describe('parseRobots', () => {
     expect(info.allowed('https://example.com/private/x')).toBe(false);
     expect(info.allowed('https://example.com/ok')).toBe(true);
   });
+
+  it('конвертирует Crawl-delay из секунд в миллисекунды', () => {
+    const info = parseRobots('https://example.com/robots.txt', 'User-agent: *\nCrawl-delay: 5\nDisallow: /x/');
+    expect(info.crawlDelayMs).toBe(5000);
+  });
 });
 
 describe('fetchRobots', () => {
