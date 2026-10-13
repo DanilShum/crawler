@@ -6,5 +6,29 @@
   "header": {
     "title": "SEO Краулер"
   },
-  "langSwitch": "Язык"
+  "langSwitch": "Язык",
+  "form": {
+    "title": "Новое сканирование",
+    "startUrl": "Стартовый URL",
+    "startUrlPlaceholder": "https://example.com",
+    "startUrlError": "Введите корректный URL, начинающийся с http:// или https://",
+    "mode": "Режим сканирования",
+    "modeSpider": "По ссылкам (spider)",
+    "modeList": "Список URL",
+    "modeSitemap": "Sitemap",
+    "listUrls": "Список URL (по одному на строку)",
+    "listUrlsPlaceholder": "https://example.com/page1\nhttps://example.com/page2",
+    "listUrlsEmpty": "Добавьте хотя бы один URL в список",
+    "listUrlsFile": "Импортировать из CSV",
+    "maxUrls": "Максимум страниц",
+    "maxDepth": "Максимальная глубина",
+    "respectRobots": "Учитывать robots.txt",
+    "renderJs": "Рендерить JavaScript",
+    "concurrency": "Параллельные запросы",
+    "requestTimeoutMs": "Таймаут запроса (мс)",
+    "numberError": "Введите целое число от {min} до {max}",
+    "submit": "Начать сканирование",
+    "submitting": "Запуск…",
+    "apiError": "Не удалось запустить сканирование: {message}"
+  }
 }

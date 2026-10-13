@@ -6,5 +6,29 @@
   "header": {
     "title": "SEO Crawler"
   },
-  "langSwitch": "Language"
+  "langSwitch": "Language",
+  "form": {
+    "title": "New crawl",
+    "startUrl": "Start URL",
+    "startUrlPlaceholder": "https://example.com",
+    "startUrlError": "Enter a valid URL starting with http:// or https://",
+    "mode": "Crawl mode",
+    "modeSpider": "Spider (follow links)",
+    "modeList": "URL list",
+    "modeSitemap": "Sitemap",
+    "listUrls": "URL list (one per line)",
+    "listUrlsPlaceholder": "https://example.com/page1\nhttps://example.com/page2",
+    "listUrlsEmpty": "Add at least one URL to the list",
+    "listUrlsFile": "Import from CSV",
+    "maxUrls": "Max pages",
+    "maxDepth": "Max depth",
+    "respectRobots": "Respect robots.txt",
+    "renderJs": "Render JavaScript",
+    "concurrency": "Concurrent requests",
+    "requestTimeoutMs": "Request timeout (ms)",
+    "numberError": "Enter an integer between {min} and {max}",
+    "submit": "Start crawl",
+    "submitting": "Starting…",
+    "apiError": "Failed to start crawl: {message}"
+  }
 }
