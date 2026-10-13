@@ -1,0 +1,11 @@
+{
+  "name": "seo-crawler",
+  "private": true,
+  "type": "module",
+  "workspaces": ["packages/*", "apps/*"],
+  "scripts": {
+    "test": "npm run test --workspaces --if-present",
+    "dev:web": "npm run dev -w @seo-crawler/web",
+    "dev:server": "npm run dev -w @seo-crawler/server"
+  }
+}
