@@ -44,7 +44,8 @@ export function computeIssues(results: PageResult[], linkStatuses: Map<string, n
     const links = [...r.internalLinks, ...r.externalLinks];
     const hasBroken = links.some((l) => {
       const s = linkStatuses.get(l.url);
-      return s === null || s >= 400;
+      // Таргет вне карты (undefined) — неизвестен и битым не считается.
+      return s !== undefined && (s === null || s >= 400);
     });
     if (hasBroken) add('broken-link', r.url);
 

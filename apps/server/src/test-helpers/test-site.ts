@@ -16,7 +16,18 @@ function homeHtml(): string {
     '<a href="/redirect">Redir</a>',
     '<a href="/binary.pdf">PDF</a>',
     '<a href="/loop">Loop</a>',
+    '<a href="/noindex">NoIndex</a>',
     '<a href="https://external.example/">Ext</a>',
+    '</body></html>',
+  ].join('');
+}
+
+function noindexHtml(): string {
+  return [
+    '<html><head><title>NoIndex</title>',
+    '<meta name="robots" content="noindex">',
+    '</head><body>',
+    '<p>hidden from search</p>',
     '</body></html>',
   ].join('');
 }
@@ -87,6 +98,10 @@ export async function startTestSite(port = 0): Promise<TestSite> {
       case '/loop':
         res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
         res.end(loopHtml());
+        break;
+      case '/noindex':
+        res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
+        res.end(noindexHtml());
         break;
       case '/private/secret':
         res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
