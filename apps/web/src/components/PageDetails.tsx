@@ -115,11 +115,28 @@ export default defineComponent({
             <dd data-test="meta-response-time">{`${props.page.responseTimeMs} ms`}</dd>
             <dt>{t('details.depth')}</dt>
             <dd data-test="meta-depth">{props.page.depth}</dd>
+            <dt>{t('details.fetchedAt')}</dt>
+            <dd data-test="meta-fetched-at">{new Date(props.page.fetchedAt).toLocaleString()}</dd>
             <dt>{t('details.rendered')}</dt>
             <dd data-test="meta-rendered">
               {props.page.rendered ? t('details.yes') : t('details.no')}
             </dd>
           </dl>
+        </div>
+
+        <div class="pd-section">
+          <h4>{t('details.redirectChain')}</h4>
+          {props.page.redirectChain.length === 0 ? (
+            <p class="pd-muted" data-test="redirect-chain">—</p>
+          ) : (
+            <ul class="pd-list" data-test="redirect-chain">
+              {props.page.redirectChain.map((u, i) => (
+                <li key={i} class="mono pd-url-sm">
+                  {u}
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
 
         <div class="pd-section">

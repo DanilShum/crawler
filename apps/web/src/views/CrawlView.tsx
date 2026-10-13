@@ -83,6 +83,8 @@ export default defineComponent({
                 <button
                   key={tab}
                   type="button"
+                  role="tab"
+                  aria-selected={store.tab === tab ? 'true' : 'false'}
                   class={['tab-item', store.tab === tab ? 'active' : ''].join(' ')}
                   data-test={`tab-${tab}`}
                   onClick={() => store.setTab(tab)}

@@ -106,6 +106,36 @@ describe('CrawlForm', () => {
     );
   });
 
+  it('ошибка чтения CSV-файла показывает ошибку под полем списка', async () => {
+    const onSubmit = vi.fn();
+    const wrapper = mountForm(onSubmit);
+    await wrapper.find('input[name="mode"][value="list"]').setValue(true);
+
+    // Стаб FileReader, который сразу завершается ошибкой чтения файла.
+    class FakeFileReader {
+      onload: (() => void) | null = null;
+      onerror: (() => void) | null = null;
+      result: string | null = null;
+      readAsText(): void {
+        this.onerror?.();
+      }
+    }
+    vi.stubGlobal('FileReader', FakeFileReader as unknown as typeof FileReader);
+
+    const input = wrapper.find('input[type="file"]');
+    Object.defineProperty(input.element, 'files', {
+      value: [{ name: 'broken.csv' }],
+      configurable: true,
+    });
+    await input.trigger('change');
+
+    const error = wrapper.find('[data-test="error"]');
+    expect(error.exists()).toBe(true);
+    expect(error.text()).toBe(i18n.global.t('form.fileReadError'));
+    expect(onSubmit).not.toHaveBeenCalled();
+    vi.unstubAllGlobals();
+  });
+
   it('число вне диапазона: ошибка под полем, onSubmit не вызван', async () => {
     const onSubmit = vi.fn();
     const wrapper = mountForm(onSubmit);

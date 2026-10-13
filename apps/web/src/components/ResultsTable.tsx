@@ -85,12 +85,12 @@ export default defineComponent({
 
     function goPrev(): void {
       store.pageOffset = Math.max(0, store.pageOffset - PAGE_LIMIT);
-      void store.loadPages();
+      void store.loadPages().catch(() => {});
     }
 
     function goNext(): void {
       store.pageOffset += PAGE_LIMIT;
-      void store.loadPages();
+      void store.loadPages().catch(() => {});
     }
 
     const header = (key: SortKey, labelKey: string) => (

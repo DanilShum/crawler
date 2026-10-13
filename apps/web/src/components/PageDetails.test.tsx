@@ -67,6 +67,10 @@ describe('PageDetails', () => {
     expect(wrapper.find('[data-test="status-badge"]').text()).toContain('404');
     expect(wrapper.find('[data-test="page-error"]').text()).toBe('not-found');
 
+    // fetchedAt (локальная строка; год стабилен) и пустая цепочка редиректов — «—»
+    expect(wrapper.find('[data-test="meta-fetched-at"]').text()).toContain('2026');
+    expect(wrapper.find('[data-test="redirect-chain"]').text()).toBe('—');
+
     // внутренние и внешние ссылки
     expect(text).toContain('http://example.com/in');
     expect(text).toContain('http://external.com/x');
@@ -100,6 +104,19 @@ describe('PageDetails', () => {
 
     await wrapper.find('[data-test="close-details"]').trigger('click');
     expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('цепочка редиректов показывается списком URL', () => {
+    const redirected: PageResult = {
+      ...page,
+      redirectChain: ['http://example.com/redirect', 'http://example.com/mid'],
+    };
+    const wrapper = mountDetails(redirected);
+    const chain = wrapper.find('[data-test="redirect-chain"]');
+    expect(chain.exists()).toBe(true);
+    expect(chain.text()).toContain('http://example.com/redirect');
+    expect(chain.text()).toContain('http://example.com/mid');
+    expect(wrapper.find('[data-test="redirect-chain"] li').exists()).toBe(true);
   });
 
   it('страница без ошибок и без schema — секции рендерятся корректно', () => {

@@ -143,6 +143,16 @@ describe('CrawlView', () => {
     expect(exportLink.attributes('download')).toBeDefined();
   });
 
+  it('вкладки помечены role="tab" и aria-selected соответствует активной', async () => {
+    await mountView();
+    const internal = wrapper.find('[data-test="tab-internal"]');
+    const external = wrapper.find('[data-test="tab-external"]');
+    expect(internal.attributes('role')).toBe('tab');
+    expect(external.attributes('role')).toBe('tab');
+    expect(internal.attributes('aria-selected')).toBe('true');
+    expect(external.attributes('aria-selected')).toBe('false');
+  });
+
   it('клик по вкладке External ставит store.tab = external', async () => {
     await mountView();
     await wrapper.find('[data-test="tab-external"]').trigger('click');

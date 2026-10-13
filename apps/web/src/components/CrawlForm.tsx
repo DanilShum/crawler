@@ -65,6 +65,9 @@ export default defineComponent({
       reader.onload = () => {
         listUrlsText.value = parseCsv(String(reader.result ?? '')).join('\n');
       };
+      reader.onerror = () => {
+        errors.value.listUrls = t('form.fileReadError');
+      };
       reader.readAsText(file);
       input.value = '';
     }
