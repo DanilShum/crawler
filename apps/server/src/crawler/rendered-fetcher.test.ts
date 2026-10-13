@@ -77,4 +77,12 @@ describe.skipIf(!hasChromium)('RenderedFetcher (Playwright)', () => {
     expect(outcome.sizeBytes).toBeGreaterThan(0);
     expect(outcome.responseTimeMs).toBeGreaterThanOrEqual(0);
   }, 60_000);
+
+  it('null-ответ goto (about:blank) — status null и error, а не «успех» без статуса', async () => {
+    const outcome = await fetcher.fetch('about:blank', 30_000);
+    expect(outcome.status).toBeNull();
+    expect(outcome.error).toBe('connection');
+    expect(outcome.body).toBeNull();
+    expect(outcome.sizeBytes).toBe(0);
+  }, 60_000);
 });
