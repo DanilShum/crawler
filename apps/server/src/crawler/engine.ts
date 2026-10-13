@@ -193,10 +193,17 @@ export class Crawler {
     };
   }
 
-  private record(result: PageResult): void {
+  private record(result: PageResult): boolean {
+    // Финальная страховка лимита: страница могла ждать check-запросы внешних ссылок,
+    // пока другие воркеры уже дописали лимит. Повторные записи уже существующего URL не блокируем —
+    // они не растят размер набора.
+    if (this.results.size >= this.options.maxUrls && !this.results.has(result.url)) {
+      return false;
+    }
     this.results.set(result.url, result);
     this.emit({ type: 'page', result });
     this.emitProgress();
+    return true;
   }
 
   private emitProgress(): void {

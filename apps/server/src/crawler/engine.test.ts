@@ -60,6 +60,22 @@ describe('Crawler spider', () => {
     } finally { await site.close(); }
   });
 
+  it('maxUrls=1 не превышает лимит, даже пока страница ждёт check внешней ссылки', async () => {
+    const site = await startTestSite();
+    try {
+      const { pages, crawler } = await run(site.origin,
+        opts(site.origin, { maxUrls: 1 }));
+      // Стартовая страница содержит внешнюю ссылку: пока она ждёт check-запрос,
+      // другие воркеры могут успеть записать свои страницы — финальная страховка
+      // в record() не должна дать результату вырасти сверх maxUrls.
+      expect(pages.length).toBe(1);
+      // Внешний check действительно выполнился при обработке единственной страницы —
+      // окно гонки закрыто, а статус внешней ссылки зафиксирован.
+      expect(pages[0].externalLinks.some((l) => l.url.startsWith('https://external.example'))).toBe(true);
+      expect(crawler.linkStatuses.has('https://external.example/')).toBe(true);
+    } finally { await site.close(); }
+  });
+
   it('таймаут даёт страницу со status=null и error, а не потерю', async () => {
     const site = await startTestSite();
     try {
