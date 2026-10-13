@@ -2,6 +2,7 @@ import Fastify from 'fastify';
 import type { FastifyInstance } from 'fastify';
 import { TooManySessionsError } from '../session/session-manager';
 import type { SessionManager } from '../session/session-manager';
+import { toCsv } from '../export/csv';
 import type { CrawlOptions, IssueKind, PageResult } from '@seo-crawler/shared';
 
 const MODES = ['spider', 'list', 'sitemap'] as const;
@@ -232,6 +233,19 @@ export function buildApp(deps: { sessions: SessionManager }): FastifyInstance {
       return reply.code(404).send({ error: 'NOT_FOUND', message: 'сессия не найдена' });
     }
     return reply.code(200).send(session.issues());
+  });
+
+  app.get('/api/crawl/:id/export', async (req, reply) => {
+    const { id } = req.params as { id: string };
+    const session = deps.sessions.get(id);
+    if (!session) {
+      return reply.code(404).send({ error: 'NOT_FOUND', message: 'сессия не найдена' });
+    }
+    return reply
+      .code(200)
+      .header('content-type', 'text/csv; charset=utf-8')
+      .header('content-disposition', `attachment; filename="crawl-${id}.csv"`)
+      .send(toCsv(Array.from(session.results.values())));
   });
 
   app.get('/api/crawls', async () => {

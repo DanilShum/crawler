@@ -233,6 +233,44 @@ describe('crawl API routes', () => {
     }
   });
 
+  it('GET /api/crawl/:id/export отдаёт CSV: 200, заголовки, BOM, URL страниц', async () => {
+    const site = await startTestSite();
+    try {
+      const { app, sessions } = newApp();
+      const start = await app.inject({
+        method: 'POST',
+        url: '/api/crawl',
+        payload: { startUrl: site.origin + '/', ...BASE },
+        headers: { 'content-type': 'application/json' },
+      });
+      const { id } = start.json();
+      await waitDone(sessions, id);
+
+      const res = await app.inject({ method: 'GET', url: `/api/crawl/${id}/export` });
+      expect(res.statusCode).toBe(200);
+      expect(res.headers['content-type']).toBe('text/csv; charset=utf-8');
+      expect(res.headers['content-disposition']).toBe(`attachment; filename="crawl-${id}.csv"`);
+      const body = res.body;
+      // BOM + заголовок колонок первой строкой
+      expect(body.startsWith('\uFEFFurl,status,error,')).toBe(true);
+      // все URL прокрауленных страниц присутствуют в теле
+      const all = [...sessions.get(id)!.results.values()];
+      expect(all.length).toBeGreaterThan(0);
+      for (const p of all) {
+        expect(body).toContain(p.url);
+      }
+    } finally {
+      await site.close();
+    }
+  });
+
+  it('GET /api/crawl/:id/export неизвестного id → 404', async () => {
+    const { app } = newApp();
+    const res = await app.inject({ method: 'GET', url: '/api/crawl/nope/export' });
+    expect(res.statusCode).toBe(404);
+    expect(res.json()).toMatchObject({ error: 'NOT_FOUND' });
+  });
+
   it('GET pages неизвестного id → 404', async () => {
     const { app } = newApp();
     const res = await app.inject({ method: 'GET', url: '/api/crawl/nope/pages' });
