@@ -1,0 +1,10 @@
+{
+  "nav": {
+    "newCrawl": "New crawl",
+    "history": "History"
+  },
+  "header": {
+    "title": "SEO Crawler"
+  },
+  "langSwitch": "Language"
+}

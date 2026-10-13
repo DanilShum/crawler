@@ -1,0 +1,142 @@
+:root {
+  --accent: #2f6fed;
+  --bg: #f7f8fa;
+  --fg: #1c2330;
+  --muted: #68707e;
+  --border: #d9dee7;
+  --ok: #2e9e5b;
+  --warn: #d9a514;
+  --err: #d64545;
+  --mono: 'SFMono-Regular', 'Consolas', 'Liberation Mono', 'Menlo', monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+#app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 12px 24px;
+  background: #ffffff;
+  border-bottom: 1px solid var(--border);
+}
+
+.app-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.app-nav {
+  display: flex;
+  gap: 16px;
+}
+
+.app-nav a {
+  color: var(--fg);
+  text-decoration: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+}
+
+.app-nav a:hover {
+  background: var(--bg);
+  color: var(--accent);
+}
+
+.app-nav a.router-link-active {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.lang-switch {
+  margin-left: auto;
+  display: flex;
+  gap: 4px;
+}
+
+.lang-switch button {
+  appearance: none;
+  border: 1px solid var(--border);
+  background: #ffffff;
+  color: var(--muted);
+  font: inherit;
+  font-size: 13px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.lang-switch button:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.view {
+  padding: 24px;
+}
+
+code,
+pre,
+.mono {
+  font-family: var(--mono);
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid var(--border);
+  background: #ffffff;
+  color: var(--fg);
+}
+
+.badge-ok {
+  color: var(--ok);
+  border-color: var(--ok);
+  background: color-mix(in srgb, var(--ok) 10%, #ffffff);
+}
+
+.badge-redirect {
+  color: var(--warn);
+  border-color: var(--warn);
+  background: color-mix(in srgb, var(--warn) 12%, #ffffff);
+}
+
+.badge-error {
+  color: var(--err);
+  border-color: var(--err);
+  background: color-mix(in srgb, var(--err) 10%, #ffffff);
+}

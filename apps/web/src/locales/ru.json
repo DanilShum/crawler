@@ -1,0 +1,10 @@
+{
+  "nav": {
+    "newCrawl": "Новое сканирование",
+    "history": "История"
+  },
+  "header": {
+    "title": "SEO Краулер"
+  },
+  "langSwitch": "Язык"
+}
