@@ -5,7 +5,7 @@ import type { RobotsInfo } from './robots';
 import { fetchSitemapUrls } from './sitemap';
 import type { CrawlOptions, PageResult, HeadingLevel } from '@seo-crawler/shared';
 import { createFetcher } from './rendered-fetcher';
-import type { Fetcher } from './fetcher';
+import type { Fetcher, FetchOutcome } from './fetcher';
 
 export type EngineEvent =
   | { type: 'page'; result: PageResult }
@@ -15,6 +15,10 @@ export type EngineEvent =
 interface QueueItem { url: string; depth: number; }
 
 const EMPTY_HEADINGS: Record<HeadingLevel, string[]> = { h1: [], h2: [], h3: [], h4: [], h5: [], h6: [] };
+
+// Гейт Crawl-delay: общий «последний старт fetch» + цепочка обещаний, разводящая
+// моменты стартов соседних запросов (сами фетчи выполняются конкурентно).
+const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
 
 export class Crawler {
   readonly linkStatuses = new Map<string, number | null>();
@@ -33,6 +37,8 @@ export class Crawler {
   private started = false;
   private finished = false;
   private inFlight = 0;
+  private lastFetchStart = 0;
+  private throttlePromise: Promise<void> | null = null;
 
   constructor(options: CrawlOptions, fetcher: Fetcher = createFetcher(options.renderJs), emit: (e: EngineEvent) => void) {
     this.options = options;
@@ -99,6 +105,27 @@ export class Crawler {
     return !this.options.respectRobots || this.robots === null || this.robots.allowed(url);
   }
 
+  /**
+   * Fetch с уважением Crawl-delay: при respectRobots=true и crawlDelayMs > 0 старты
+   * соседних запросов на хост разносятся не меньше чем на crawlDelayMs (общий гейт
+   * «последний старт»), при этом сами фетчи продолжают выполняться конкурентно.
+   * Без троттлинга — прямой вызов fetcher'а.
+   */
+  private async throttledFetch(url: string, timeoutMs: number): Promise<FetchOutcome> {
+    const delay = this.options.respectRobots ? (this.robots?.crawlDelayMs ?? 0) : 0;
+    if (delay <= 0) return this.fetcher.fetch(url, timeoutMs);
+
+    const prev = this.throttlePromise;
+    this.throttlePromise = (async (): Promise<void> => {
+      if (prev) await prev;
+      const wait = this.lastFetchStart + delay - Date.now();
+      if (wait > 0) await sleep(wait);
+      this.lastFetchStart = Date.now();
+    })();
+    await this.throttlePromise;
+    return this.fetcher.fetch(url, timeoutMs);
+  }
+
   private async worker(): Promise<void> {
     for (;;) {
       if (this.stopped || this.results.size >= this.options.maxUrls) return;
@@ -122,7 +149,7 @@ export class Crawler {
     if (item.depth > this.options.maxDepth) return;
     if (!this.robotsAllowed(item.url)) return;
 
-    const outcome = await this.fetcher.fetch(item.url, this.options.requestTimeoutMs);
+    const outcome = await this.throttledFetch(item.url, this.options.requestTimeoutMs);
     this.linkStatuses.set(item.url, outcome.status);
 
     // maxUrls сверяется и после fetch: в полёте может быть несколько параллельных фетчей,
@@ -182,7 +209,7 @@ export class Crawler {
       for (const ext of result.externalLinks) {
         if (this.checkedLinks.has(ext.url)) continue;
         this.checkedLinks.add(ext.url);
-        const check = await this.fetcher.fetch(ext.url, this.options.requestTimeoutMs);
+        const check = await this.throttledFetch(ext.url, this.options.requestTimeoutMs);
         this.linkStatuses.set(ext.url, check.status);
       }
     }

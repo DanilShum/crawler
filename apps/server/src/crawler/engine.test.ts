@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { startTestSite } from '../test-helpers/test-site';
 import { Crawler } from './engine';
 import { HttpFetcher } from './fetcher';
+import type { Fetcher } from './fetcher';
 import type { CrawlOptions, PageResult } from '@seo-crawler/shared';
 
 function opts(origin: string, over: Partial<CrawlOptions> = {}): CrawlOptions {
@@ -93,6 +94,39 @@ describe('Crawler spider', () => {
     try {
       const { pages } = await run(site.origin, opts(site.origin, { respectRobots: false }));
       expect(pages.length).toBeGreaterThan(2);
+    } finally { await site.close(); }
+  });
+
+  it('уважает Crawl-delay: старты fetch разнесены не меньше crawlDelayMs', async () => {
+    const site = await startTestSite(0, { crawlDelaySeconds: 0.15 });
+    try {
+      // Обёртка-рекордер замеряет моменты стартов fetch (гейт срабатывает до вызова fetcher'а).
+      const starts: number[] = [];
+      const inner = new HttpFetcher();
+      const recording: Fetcher = {
+        fetch: async (url, timeout) => {
+          starts.push(Date.now());
+          return inner.fetch(url, timeout);
+        },
+        close: () => inner.close(),
+      };
+      // list-режим без внешних ссылок: тест самодостаточен, DNS наружу не трогает.
+      const crawler = new Crawler(
+        opts(site.origin, {
+          mode: 'list',
+          listUrls: ['/', '/about', '/missing', '/redirect', '/binary.pdf', '/loop', '/noindex'],
+          concurrency: 5,
+        }),
+        recording,
+        () => {},
+      );
+      await crawler.start();
+      await inner.close();
+
+      expect(starts.length).toBeGreaterThan(3);
+      for (let i = 1; i < starts.length; i++) {
+        expect(starts[i] - starts[i - 1]).toBeGreaterThanOrEqual(150);
+      }
     } finally { await site.close(); }
   });
 });

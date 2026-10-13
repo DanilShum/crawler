@@ -6,6 +6,11 @@ export interface TestSite {
   close(): Promise<void>;
 }
 
+export interface TestSiteOptions {
+  /** Crawl-delay в секундах для директивы robots.txt (по умолчанию директива отсутствует). */
+  crawlDelaySeconds?: number;
+}
+
 const PDF_BUFFER = Buffer.from('%PDF-1.4\n% fake pdf body for tests\n');
 
 function homeHtml(): string {
@@ -69,7 +74,7 @@ function sitemapXml(origin: string): string {
   ].join('\n');
 }
 
-export async function startTestSite(port = 0): Promise<TestSite> {
+export async function startTestSite(port = 0, options: TestSiteOptions = {}): Promise<TestSite> {
   let origin = '';
 
   const server = http.createServer((req, res) => {
@@ -108,8 +113,11 @@ export async function startTestSite(port = 0): Promise<TestSite> {
         res.end(secretHtml());
         break;
       case '/robots.txt':
+        const crawlDelayLine = options.crawlDelaySeconds !== undefined
+          ? `Crawl-delay: ${options.crawlDelaySeconds}\n`
+          : '';
         res.writeHead(200, { 'content-type': 'text/plain; charset=utf-8' });
-        res.end(`User-agent: *\nAllow: /\nDisallow: /private/\nSitemap: ${origin}/sitemap.xml\n`);
+        res.end(`User-agent: *\nAllow: /\nDisallow: /private/\n${crawlDelayLine}Sitemap: ${origin}/sitemap.xml\n`);
         break;
       case '/sitemap.xml':
         res.writeHead(200, { 'content-type': 'application/xml; charset=utf-8' });
