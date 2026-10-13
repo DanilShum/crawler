@@ -2,6 +2,7 @@ import { normalizeUrl, isInternal } from './url-utils';
 import { extractPageData } from './extract';
 import { fetchRobots } from './robots';
 import type { RobotsInfo } from './robots';
+import { fetchSitemapUrls } from './sitemap';
 import type { CrawlOptions, PageResult, HeadingLevel } from '@seo-crawler/shared';
 import type { Fetcher } from './fetcher';
 
@@ -26,6 +27,7 @@ export class Crawler {
   private readonly checkedLinks = new Set<string>();
   private robots: RobotsInfo | null = null;
   private origin = '';
+  private followLinks = false;
   private stopped = false;
   private started = false;
   private finished = false;
@@ -48,23 +50,42 @@ export class Crawler {
     if (this.options.respectRobots) {
       this.robots = await fetchRobots(this.origin, this.options.requestTimeoutMs);
     }
-    this.seedQueue();
-    const workers = Array.from({ length: Math.max(1, this.options.concurrency) }, () => this.worker());
-    await Promise.all(workers);
-    if (!this.finished) {
-      this.finished = true;
-      this.emitProgress();
-      this.emit({ type: 'done', state: this.stopped ? 'stopped' : 'done' });
-    }
-  }
-
-  private seedQueue(): void {
-    if (this.options.mode === 'spider') {
-      this.enqueue(this.options.startUrl, 0);
+    this.followLinks = this.options.mode === 'spider';
+    if (!(await this.seedQueue())) {
+      // Sitemap не найден или пуст — нечего обходить
+      this.finish();
       return;
     }
-    // list/sitemap — семплирование своих стратегий появится в Task 7
+    const workers = Array.from({ length: Math.max(1, this.options.concurrency) }, () => this.worker());
+    await Promise.all(workers);
+    if (!this.finished) this.finish();
+  }
+
+  private finish(): void {
+    this.finished = true;
+    this.emitProgress();
+    this.emit({ type: 'done', state: this.stopped ? 'stopped' : 'done' });
+  }
+
+  // false — очередь пустая (sitemap не найден/пуст), запускать воркеры не нужно
+  private async seedQueue(): Promise<boolean> {
+    if (this.options.mode === 'list') {
+      for (const raw of this.options.listUrls ?? []) {
+        const url = normalizeUrl(raw, this.options.startUrl);
+        if (url) this.enqueue(url, 0);
+      }
+      return true;
+    }
+    if (this.options.mode === 'sitemap') {
+      const sitemapUrl = this.robots?.sitemaps[0] ?? `${this.origin}/sitemap.xml`;
+      for (const raw of await fetchSitemapUrls(sitemapUrl, this.options.requestTimeoutMs)) {
+        const url = normalizeUrl(raw, this.origin);
+        if (url) this.enqueue(url, 0);
+      }
+      return this.queue.length > 0;
+    }
     this.enqueue(this.options.startUrl, 0);
+    return true;
   }
 
   private enqueue(url: string, depth: number): void {
@@ -114,7 +135,8 @@ export class Crawler {
       // undici уже следует редиректу, тело — это содержимое финального URL.
       // Не парсим его повторно под URL редиректа: финальный URL обрабатывается самостоятельно.
       const target = normalizeUrl(outcome.finalUrl, outcome.finalUrl);
-      if (target && isInternal(target, this.origin) && !this.seen.has(target) && this.robotsAllowed(target)) {
+      if (this.followLinks
+        && target && isInternal(target, this.origin) && !this.seen.has(target) && this.robotsAllowed(target)) {
         this.seen.add(target);
         this.queue.push({ url: target, depth: item.depth + 1 });
       }
@@ -146,7 +168,7 @@ export class Crawler {
           continue;
         }
         result.internalLinks.push({ url: norm, anchor: link.anchor, rel: link.rel });
-        if (this.options.mode === 'spider'
+        if (this.followLinks
           && item.depth + 1 <= this.options.maxDepth
           && !this.seen.has(norm)
           && this.robotsAllowed(norm)) {
