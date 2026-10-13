@@ -30,5 +30,19 @@
     "submit": "Начать сканирование",
     "submitting": "Запуск…",
     "apiError": "Не удалось запустить сканирование: {message}"
+  },
+  "dashboard": {
+    "crawled": "Просканировано",
+    "queued": "В очереди",
+    "errors": "Ошибки",
+    "stop": "Остановить",
+    "running": "Выполняется",
+    "done": "Завершено",
+    "stopped": "Остановлено"
+  },
+  "issues": {
+    "brokenLink": "Битые ссылки",
+    "duplicateTitle": "Дубли title",
+    "noindex": "noindex"
   }
 }

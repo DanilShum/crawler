@@ -262,3 +262,80 @@ pre,
   opacity: 0.6;
   cursor: default;
 }
+
+.badge-accent {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, #ffffff);
+}
+
+.badge-warn {
+  color: var(--warn);
+  border-color: var(--warn);
+  background: color-mix(in srgb, var(--warn) 12%, #ffffff);
+}
+
+.progress-dashboard {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 18px;
+  max-width: 720px;
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 16px;
+}
+
+.progress {
+  flex: 1 1 160px;
+  min-width: 120px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--border);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--accent);
+  transition: width 0.3s ease;
+}
+
+.counter {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.counter-value {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.counter-errors .counter-value {
+  color: var(--err);
+}
+
+.issue-summary {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.btn-stop {
+  margin-left: auto;
+  appearance: none;
+  border: 1px solid var(--err);
+  border-radius: 6px;
+  background: #ffffff;
+  color: var(--err);
+  font: inherit;
+  font-weight: 600;
+  padding: 8px 16px;
+  cursor: pointer;
+}
+
+.btn-stop:hover {
+  background: color-mix(in srgb, var(--err) 10%, #ffffff);
+}

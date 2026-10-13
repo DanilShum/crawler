@@ -30,5 +30,19 @@
     "submit": "Start crawl",
     "submitting": "Starting…",
     "apiError": "Failed to start crawl: {message}"
+  },
+  "dashboard": {
+    "crawled": "Crawled",
+    "queued": "Queued",
+    "errors": "Errors",
+    "stop": "Stop",
+    "running": "Running",
+    "done": "Done",
+    "stopped": "Stopped"
+  },
+  "issues": {
+    "brokenLink": "Broken links",
+    "duplicateTitle": "Duplicate titles",
+    "noindex": "noindex"
   }
 }
