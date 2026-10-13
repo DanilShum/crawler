@@ -52,8 +52,12 @@ interface InternalSession {
   startedAt: string;
 }
 
+export type FetcherFactory = (renderJs: boolean) => Fetcher;
+
 export class SessionManager {
   private readonly internal = new Map<string, InternalSession>();
+
+  constructor(private readonly fetcherFactory: FetcherFactory = createFetcher) {}
 
   /** Создаёт и запускает краул. Синхронный: движок стартует в фоне. */
   create(options: CrawlOptions): { id: string } {
@@ -73,7 +77,7 @@ export class SessionManager {
     let finished = false;
 
     // fetcher и crawler должны существовать до того, как на них сошлются замыкания.
-    const fetcher: Fetcher = createFetcher(options.renderJs);
+    const fetcher: Fetcher = this.fetcherFactory(options.renderJs);
     let crawler!: Crawler;
 
     const recomputeIssues = (): void => {

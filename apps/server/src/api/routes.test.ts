@@ -2,6 +2,7 @@ import { describe, it, expect, afterEach } from 'vitest';
 import { buildApp } from './routes';
 import { SessionManager } from '../session/session-manager';
 import { startTestSite } from '../test-helpers/test-site';
+import { createNoNetworkFetcher } from '../test-helpers/no-network-fetcher';
 import type { FastifyInstance } from 'fastify';
 
 const BASE = {
@@ -15,7 +16,8 @@ const BASE = {
 };
 
 function makeApp() {
-  const sessions = new SessionManager();
+  // Блокируем сетевые вызовы наружу (external.example в фикстуре).
+  const sessions = new SessionManager(createNoNetworkFetcher);
   const app = buildApp({ sessions });
   return { app, sessions };
 }

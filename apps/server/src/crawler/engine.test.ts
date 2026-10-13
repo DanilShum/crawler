@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { startTestSite } from '../test-helpers/test-site';
+import { NoNetworkFetcher } from '../test-helpers/no-network-fetcher';
 import { Crawler } from './engine';
 import { HttpFetcher } from './fetcher';
 import type { Fetcher } from './fetcher';
@@ -11,7 +12,9 @@ function opts(origin: string, over: Partial<CrawlOptions> = {}): CrawlOptions {
 }
 
 async function run(origin: string, o: CrawlOptions) {
-  const fetcher = new HttpFetcher();
+  // NoNetworkFetcher заглушает DNS-запросы к внешним хостам (external.example в фикстуре) —
+  // тесты не делают сетевых вызовов наружу.
+  const fetcher = new NoNetworkFetcher();
   const pages: PageResult[] = [];
   const finalState: { value: string | null } = { value: null };
   const crawler = new Crawler(o, fetcher, (e) => {

@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { SessionManager } from './session-manager';
 import { startTestSite } from '../test-helpers/test-site';
+import { createNoNetworkFetcher } from '../test-helpers/no-network-fetcher';
 import type { CrawlOptions, CrawlEvent } from '@seo-crawler/shared';
 
 function opts(origin: string, over: Partial<CrawlOptions> = {}): CrawlOptions {
@@ -35,7 +36,7 @@ function waitDone(sm: SessionManager, id: string, timeoutMs = 10_000): Promise<D
 
 describe('SessionManager', () => {
   it('создаёт сессию с id и отдаёт её через get', async () => {
-    const sm = new SessionManager();
+    const sm = new SessionManager(createNoNetworkFetcher);
     const { id } = sm.create(opts('http://localhost/'));
     expect(typeof id).toBe('string');
     expect(id.length).toBeGreaterThan(0);
@@ -48,7 +49,7 @@ describe('SessionManager', () => {
   });
 
   it('get неизвестного id возвращает undefined, stop неизвестного id не бросает', () => {
-    const sm = new SessionManager();
+    const sm = new SessionManager(createNoNetworkFetcher);
     expect(sm.get('missing')).toBeUndefined();
     expect(() => sm.stop('missing')).not.toThrow();
     expect(sm.list()).toEqual([]);
@@ -56,7 +57,7 @@ describe('SessionManager', () => {
 
   it('прогресс обновляется по событиям и по завершении state=done', async () => {
     const site = await startTestSite();
-    const sm = new SessionManager();
+    const sm = new SessionManager(createNoNetworkFetcher);
     try {
       const { id } = sm.create(opts(site.origin));
       const session = sm.get(id)!;
@@ -79,7 +80,7 @@ describe('SessionManager', () => {
 
   it('лимит 3 активных сессий: четвёртая бросает TOO_MANY_SESSIONS', async () => {
     const site = await startTestSite();
-    const sm = new SessionManager();
+    const sm = new SessionManager(createNoNetworkFetcher);
     try {
       // create синхронный, start асинхронный: сразу после трёх create все в state=running
       const a = sm.create(opts(site.origin));
@@ -94,7 +95,7 @@ describe('SessionManager', () => {
 
   it('stop переводит сессию в stopped и событие done приходит со state=stopped', async () => {
     const site = await startTestSite();
-    const sm = new SessionManager();
+    const sm = new SessionManager(createNoNetworkFetcher);
     try {
       const { id } = sm.create(opts(site.origin));
       const session = sm.get(id)!;
@@ -111,7 +112,7 @@ describe('SessionManager', () => {
 
   it('list() отдаёт меты в порядке создания со state и прогрессом', async () => {
     const site = await startTestSite();
-    const sm = new SessionManager();
+    const sm = new SessionManager(createNoNetworkFetcher);
     try {
       const { id } = sm.create(opts(site.origin, { maxUrls: 1 }));
       const meta = sm.list().find((m) => m.id === id);

@@ -5,6 +5,7 @@ import { buildApp } from '../api/routes';
 import { SessionManager } from '../session/session-manager';
 import { attachCrawlWs } from './crawl-ws';
 import { startTestSite } from '../test-helpers/test-site';
+import { createNoNetworkFetcher } from '../test-helpers/no-network-fetcher';
 import type { CrawlEvent, CrawlOptions } from '@seo-crawler/shared';
 import type { FastifyInstance } from 'fastify';
 
@@ -24,7 +25,7 @@ const openApps: FastifyInstance[] = [];
 
 /** Реальный слушающий http-сервер (buildApp + WS) на случайном порту. */
 async function newListeningApp(): Promise<{ sessions: SessionManager; wsUrl: (id: string) => string }> {
-  const sessions = new SessionManager();
+  const sessions = new SessionManager(createNoNetworkFetcher);
   const app = buildApp({ sessions });
   attachCrawlWs(app.server, sessions);
   await app.listen({ port: 0, host: '127.0.0.1' });
