@@ -17,6 +17,9 @@ describe('normalizeUrl', () => {
   it('убирает trailing slash только у корня-дубликата пути', () => {
     expect(normalizeUrl('https://example.com', 'https://example.com')).toBe('https://example.com/');
   });
+  it('принимает кириллические пути', () => {
+    expect(normalizeUrl('/о-нас', 'https://example.com')).toBe('https://example.com/%D0%BE-%D0%BD%D0%B0%D1%81');
+  });
 });
 
 describe('isInternal', () => {

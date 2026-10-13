@@ -4,7 +4,7 @@ export function normalizeUrl(raw: string, baseUrl: string): string | null {
     if (u.protocol !== 'http:' && u.protocol !== 'https:') return null;
     // «Мусорные» href (например «::::»): путь без букв и цифр — невалидная ссылка
     const path = u.pathname.replace(/^\//, '');
-    if (path !== '' && !/[A-Za-z0-9]/.test(path)) return null;
+    if (path !== '' && !/\p{L}|\p{N}/u.test(path)) return null;
     u.hash = '';
     return u.toString();
   } catch {
