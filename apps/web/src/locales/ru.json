@@ -87,6 +87,21 @@
     "noindex": "noindex",
     "nofollow": "nofollow"
   },
+  "crawl": {
+    "export": "Экспорт CSV"
+  },
+  "history": {
+    "title": "История сканирований",
+    "empty": "Сканирований ещё не было — запустите первое на странице «Новое сканирование»",
+    "colUrl": "Стартовый URL",
+    "colMode": "Режим",
+    "colState": "Статус",
+    "colCrawled": "Просканировано",
+    "colStartedAt": "Запущено",
+    "stateRunning": "Выполняется",
+    "stateDone": "Завершено",
+    "stateStopped": "Остановлено"
+  },
   "issues": {
     "brokenLink": "Битые ссылки",
     "duplicateTitle": "Дубли title",

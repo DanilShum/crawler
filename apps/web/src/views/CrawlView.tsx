@@ -8,7 +8,7 @@ import ProgressDashboard from '../components/ProgressDashboard';
 import ResultsTable from '../components/ResultsTable';
 import PageDetails from '../components/PageDetails';
 import { useCrawlSession, type CrawlTab } from '../stores/crawl';
-import { stopCrawl } from '../api/client';
+import { exportUrl, stopCrawl } from '../api/client';
 
 const TABS: Array<{ tab: CrawlTab; labelKey: string }> = [
   { tab: 'internal', labelKey: 'tabs.internal' },
@@ -62,6 +62,19 @@ export default defineComponent({
     return () => (
       <main class="view crawl-view">
         <ProgressDashboard onStop={handleStop} />
+
+        {store.id ? (
+          <div class="crawl-toolbar">
+            <a
+              class="btn-export"
+              data-test="export-link"
+              href={exportUrl(store.id)}
+              download
+            >
+              {t('crawl.export')}
+            </a>
+          </div>
+        ) : null}
 
         <div class={['crawl-layout', selectedPage.value ? 'with-details' : ''].join(' ')}>
           <aside class="crawl-sidebar">

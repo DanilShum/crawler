@@ -724,3 +724,91 @@ pre,
   padding: 8px 10px;
 }
 
+/* --- экспорт CSV ------------------------------------------------------------ */
+
+.crawl-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+
+.btn-export {
+  display: inline-block;
+  appearance: none;
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  background: #ffffff;
+  color: var(--accent);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  padding: 8px 16px;
+  cursor: pointer;
+}
+
+.btn-export:hover {
+  background: color-mix(in srgb, var(--accent) 10%, #ffffff);
+}
+
+/* --- история краулов ---------------------------------------------------------- */
+
+.history-panel {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-top: 16px;
+}
+
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.history-table th {
+  text-align: left;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--muted);
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  cursor: default;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.history-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.history-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.history-row {
+  cursor: pointer;
+}
+
+.history-row:hover {
+  background: var(--bg);
+}
+
+.history-date {
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.history-empty {
+  margin-top: 16px;
+  padding: 24px 16px;
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+  background: #ffffff;
+  color: var(--muted);
+  text-align: center;
+}
+

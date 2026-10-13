@@ -87,6 +87,21 @@
     "noindex": "noindex",
     "nofollow": "nofollow"
   },
+  "crawl": {
+    "export": "Export CSV"
+  },
+  "history": {
+    "title": "Crawl history",
+    "empty": "No crawls yet — start one on the New crawl page",
+    "colUrl": "Start URL",
+    "colMode": "Mode",
+    "colState": "Status",
+    "colCrawled": "Crawled",
+    "colStartedAt": "Started",
+    "stateRunning": "Running",
+    "stateDone": "Done",
+    "stateStopped": "Stopped"
+  },
   "issues": {
     "brokenLink": "Broken links",
     "duplicateTitle": "Duplicate titles",

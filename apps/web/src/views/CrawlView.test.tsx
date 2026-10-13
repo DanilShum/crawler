@@ -135,6 +135,14 @@ describe('CrawlView', () => {
     expect(wrapper.findComponent(ProgressDashboard).exists()).toBe(true);
   });
 
+  it('рендерит ссылку Export CSV на /api/crawl/:id/export, когда id установлен', async () => {
+    await mountView();
+    const exportLink = wrapper.find('[data-test="export-link"]');
+    expect(exportLink.exists()).toBe(true);
+    expect(exportLink.attributes('href')).toBe('/api/crawl/s1/export');
+    expect(exportLink.attributes('download')).toBeDefined();
+  });
+
   it('клик по вкладке External ставит store.tab = external', async () => {
     await mountView();
     await wrapper.find('[data-test="tab-external"]').trigger('click');
