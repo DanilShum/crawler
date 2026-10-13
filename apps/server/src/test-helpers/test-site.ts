@@ -15,6 +15,7 @@ function homeHtml(): string {
     '<a href="/missing">Bad</a>',
     '<a href="/redirect">Redir</a>',
     '<a href="/binary.pdf">PDF</a>',
+    '<a href="/loop">Loop</a>',
     '<a href="https://external.example/">Ext</a>',
     '</body></html>',
   ].join('');
@@ -26,6 +27,23 @@ function aboutHtml(): string {
     '<h1>About</h1>',
     '<img src="/logo.png" alt="">',
     '<img src="/pic.png">',
+    '<a href="/private/secret">Secret</a>',
+    '</body></html>',
+  ].join('');
+}
+
+function loopHtml(): string {
+  return [
+    '<html><head><title>Loop</title></head><body>',
+    '<a href="/loop">Loop</a>',
+    '</body></html>',
+  ].join('');
+}
+
+function secretHtml(): string {
+  return [
+    '<html><head><title>Secret</title></head><body>',
+    '<p>top secret</p>',
     '</body></html>',
   ].join('');
 }
@@ -66,9 +84,17 @@ export async function startTestSite(port = 0): Promise<TestSite> {
         res.writeHead(200, { 'content-type': 'application/pdf' });
         res.end(PDF_BUFFER);
         break;
+      case '/loop':
+        res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
+        res.end(loopHtml());
+        break;
+      case '/private/secret':
+        res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
+        res.end(secretHtml());
+        break;
       case '/robots.txt':
         res.writeHead(200, { 'content-type': 'text/plain; charset=utf-8' });
-        res.end(`User-agent: *\nAllow: /\nSitemap: ${origin}/sitemap.xml\n`);
+        res.end(`User-agent: *\nAllow: /\nDisallow: /private/\nSitemap: ${origin}/sitemap.xml\n`);
         break;
       case '/sitemap.xml':
         res.writeHead(200, { 'content-type': 'application/xml; charset=utf-8' });

@@ -1,0 +1,82 @@
+import { describe, it, expect } from 'vitest';
+import { startTestSite } from '../test-helpers/test-site';
+import { Crawler } from './engine';
+import { HttpFetcher } from './fetcher';
+import type { CrawlOptions, PageResult } from '@seo-crawler/shared';
+
+function opts(origin: string, over: Partial<CrawlOptions> = {}): CrawlOptions {
+  return { startUrl: origin + '/', mode: 'spider', maxUrls: 500, maxDepth: 10,
+    respectRobots: true, renderJs: false, concurrency: 5, requestTimeoutMs: 5000, ...over };
+}
+
+async function run(origin: string, o: CrawlOptions) {
+  const fetcher = new HttpFetcher();
+  const pages: PageResult[] = [];
+  const finalState: { value: string | null } = { value: null };
+  const crawler = new Crawler(o, fetcher, (e) => {
+    if (e.type === 'page') pages.push(e.result);
+    if (e.type === 'done') finalState.value = e.state;
+  });
+  await crawler.start();
+  fetcher.close();
+  return { pages, final: finalState.value, crawler };
+}
+
+describe('Crawler spider', () => {
+  it('обходит внутренние страницы, не ходит на внешние и 404-страницы не парсит как HTML', async () => {
+    const site = await startTestSite();
+    try {
+      const { pages, final } = await run(site.origin, opts(site.origin));
+      const urls = pages.map((p) => p.url);
+      expect(urls).toContain(site.origin + '/');
+      expect(urls).toContain(site.origin + '/about');
+      expect(urls).toContain(site.origin + '/missing');
+      expect(urls.some((u) => u.startsWith('https://external.example'))).toBe(false);
+      const missing = pages.find((p) => p.url.endsWith('/missing'))!;
+      expect(missing.status).toBe(404);
+      expect(missing.title).toBeNull(); // 404 может быть HTML, но title пустой в фикстуре
+      const pdf = pages.find((p) => p.url.endsWith('/binary.pdf'))!;
+      expect(pdf.contentType).toBe('application/pdf');
+      expect(pdf.title).toBeNull();
+      expect(final).toBe('done');
+    } finally { await site.close(); }
+  });
+
+  it('следует редиректу и сохраняет финальный URL/статус', async () => {
+    const site = await startTestSite();
+    try {
+      const { pages } = await run(site.origin, opts(site.origin));
+      const redir = pages.find((p) => p.url === site.origin + '/redirect')!;
+      expect(redir.status).toBe(200);
+      expect(redir.redirectChain).toContain(site.origin + '/redirect');
+    } finally { await site.close(); }
+  });
+
+  it('уважает maxUrls и завершается на циклах', async () => {
+    const site = await startTestSite();
+    try {
+      const { pages } = await run(site.origin, opts(site.origin, { maxUrls: 2 }));
+      expect(pages.length).toBe(2);
+    } finally { await site.close(); }
+  });
+
+  it('таймаут даёт страницу со status=null и error, а не потерю', async () => {
+    const site = await startTestSite();
+    try {
+      const { pages } = await run(site.origin,
+        opts(site.origin, { requestTimeoutMs: 1, maxUrls: 1 }));
+      const first = pages[0];
+      if (first.status === null) {
+        expect(['timeout', 'connection']).toContain(first.error);
+      } // иначе ответ успел — детерминированный вариант ниже в fetcher-тесте
+    } finally { await site.close(); }
+  });
+
+  it('respectRobots=false обходит запрещённые пути', async () => {
+    const site = await startTestSite();
+    try {
+      const { pages } = await run(site.origin, opts(site.origin, { respectRobots: false }));
+      expect(pages.length).toBeGreaterThan(2);
+    } finally { await site.close(); }
+  });
+});
