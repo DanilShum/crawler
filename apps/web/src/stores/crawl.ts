@@ -29,6 +29,7 @@ export const useCrawlSession = defineStore('crawl-session', () => {
   const tab = ref<CrawlTab>('internal');
   const issueFilter = ref<string | null>(null);
   const selectedUrl = ref<string | null>(null);
+  const pageOffset = ref(0);
 
   let ws: WebSocket | null = null;
   let reconnectAttempts = 0;
@@ -97,10 +98,10 @@ export const useCrawlSession = defineStore('crawl-session', () => {
     }
   }
 
-  async function loadPages(): Promise<void> {
+  async function loadPages(offset = pageOffset.value): Promise<void> {
     if (!id.value) return;
     const data = await fetchPages(id.value, {
-      offset: 0,
+      offset,
       limit: PAGE_LIMIT,
       tab: tab.value,
       issue: issueFilter.value ?? undefined,
@@ -142,6 +143,7 @@ export const useCrawlSession = defineStore('crawl-session', () => {
     tab.value = 'internal';
     issueFilter.value = null;
     selectedUrl.value = null;
+    pageOffset.value = 0;
     connect();
     // REST-база, чтобы UI не ждал WS
     void loadPages().catch(() => {});
@@ -154,11 +156,13 @@ export const useCrawlSession = defineStore('crawl-session', () => {
 
   function setTab(next: CrawlTab): void {
     tab.value = next;
+    pageOffset.value = 0;
     void loadPages().catch(() => {});
   }
 
   function setIssueFilter(issue: string | null): void {
     issueFilter.value = issue;
+    pageOffset.value = 0;
     void loadPages().catch(() => {});
   }
 
@@ -171,6 +175,7 @@ export const useCrawlSession = defineStore('crawl-session', () => {
     tab,
     issueFilter,
     selectedUrl,
+    pageOffset,
     open,
     close,
     loadPages,

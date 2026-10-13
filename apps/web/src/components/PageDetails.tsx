@@ -1,0 +1,184 @@
+// apps/web/src/components/PageDetails.tsx
+import { computed, defineComponent, type PropType } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { type HeadingLevel, type LinkInfo, type PageResult } from '@seo-crawler/shared';
+
+const HEADING_LEVELS: HeadingLevel[] = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
+
+function statusClass(page: PageResult): string {
+  if (page.status === null) return 'badge-error';
+  if (page.status < 300) return 'badge-ok';
+  if (page.status < 400) return 'badge-redirect';
+  return 'badge-error';
+}
+
+function formatBytes(n: number): string {
+  if (n < 1024) return `${n} B`;
+  if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
+  return `${(n / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function renderLinks(links: LinkInfo[]) {
+  if (links.length === 0) return <p class="pd-muted">—</p>;
+  return (
+    <ul class="pd-list">
+      {links.map((l, i) => (
+        <li key={i}>
+          <span class="mono pd-url-sm">{l.url}</span>
+          {l.anchor !== null ? <span class="pd-muted"> ({l.anchor})</span> : null}
+          {l.rel !== null ? <span class="pd-muted"> [{l.rel}]</span> : null}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+export default defineComponent({
+  name: 'PageDetails',
+  props: {
+    page: {
+      type: Object as PropType<PageResult>,
+      required: true,
+    },
+    onClose: {
+      type: Function as PropType<() => void>,
+      required: false,
+    },
+  },
+  setup(props) {
+    const { t } = useI18n();
+
+    const statusText = computed(() =>
+      props.page.status !== null ? String(props.page.status) : (props.page.error ?? t('details.error')),
+    );
+
+    return () => (
+      <aside class="page-details" data-test="page-details">
+        <div class="pd-header">
+          <div>
+            <div class="caption">{t('details.url')}</div>
+            <div class="pd-url" data-test="details-url">
+              {props.page.url}
+            </div>
+          </div>
+          <button
+            type="button"
+            class="pd-close"
+            data-test="close-details"
+            onClick={() => props.onClose?.()}
+          >
+            {t('details.close')}
+          </button>
+        </div>
+
+        <div class="pd-section pd-badges">
+          <span class={`badge ${statusClass(props.page)}`} data-test="status-badge">
+            {statusText.value}
+          </span>
+          {props.page.noindex ? (
+            <span class="badge badge-error" data-test="badge-noindex">
+              {t('details.noindex')}
+            </span>
+          ) : null}
+          {props.page.nofollow ? (
+            <span class="badge badge-warn" data-test="badge-nofollow">
+              {t('details.nofollow')}
+            </span>
+          ) : null}
+        </div>
+
+        {props.page.error !== null ? (
+          <div class="pd-section">
+            <div class="caption">{t('details.error')}</div>
+            <div class="pd-error" data-test="page-error">
+              {props.page.error}
+            </div>
+          </div>
+        ) : null}
+
+        <div class="pd-section">
+          <h4>{t('details.metadata')}</h4>
+          <dl class="pd-kv">
+            <dt>{t('details.title')}</dt>
+            <dd data-test="meta-title">{props.page.title ?? '—'}</dd>
+            <dt>{t('details.description')}</dt>
+            <dd data-test="meta-description">{props.page.description ?? '—'}</dd>
+            <dt>{t('details.metaRobots')}</dt>
+            <dd data-test="meta-robots">{props.page.metaRobots ?? '—'}</dd>
+            <dt>{t('details.canonical')}</dt>
+            <dd data-test="meta-canonical">{props.page.canonical ?? '—'}</dd>
+            <dt>{t('details.contentType')}</dt>
+            <dd data-test="meta-content-type">{props.page.contentType ?? '—'}</dd>
+            <dt>{t('details.size')}</dt>
+            <dd data-test="meta-size">{formatBytes(props.page.sizeBytes)}</dd>
+            <dt>{t('details.responseTime')}</dt>
+            <dd data-test="meta-response-time">{`${props.page.responseTimeMs} ms`}</dd>
+            <dt>{t('details.depth')}</dt>
+            <dd data-test="meta-depth">{props.page.depth}</dd>
+            <dt>{t('details.rendered')}</dt>
+            <dd data-test="meta-rendered">
+              {props.page.rendered ? t('details.yes') : t('details.no')}
+            </dd>
+          </dl>
+        </div>
+
+        <div class="pd-section">
+          <h4>{t('details.headings')}</h4>
+          {HEADING_LEVELS.map((level) =>
+            props.page.headings[level].length > 0 ? (
+              <div class="pd-heading" key={level} data-test={`heading-${level}`}>
+                <span class="pd-tag">{level.toUpperCase()}</span>
+                <ul class="pd-list">
+                  {props.page.headings[level].map((h, i) => (
+                    <li key={i}>{h}</li>
+                  ))}
+                </ul>
+              </div>
+            ) : null,
+          )}
+        </div>
+
+        <div class="pd-section">
+          <h4>{t('details.images')}</h4>
+          {props.page.images.length === 0 ? (
+            <p class="pd-muted">—</p>
+          ) : (
+            <ul class="pd-list">
+              {props.page.images.map((img, i) => (
+                <li key={i} data-test="image">
+                  <span class="mono pd-url-sm">{img.url}</span>
+                  {img.alt === null ? (
+                    <span class="badge badge-error pd-alt" data-test="missing-alt">
+                      {t('details.noAlt')}
+                    </span>
+                  ) : (
+                    <span class="pd-alt" data-test="has-alt">
+                      {img.alt}
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        <div class="pd-section">
+          <h4>{t('details.internalLinks')}</h4>
+          {renderLinks(props.page.internalLinks)}
+        </div>
+
+        <div class="pd-section">
+          <h4>{t('details.externalLinks')}</h4>
+          {renderLinks(props.page.externalLinks)}
+        </div>
+
+        <div class="pd-section">
+          <h4>{t('details.schema')}</h4>
+          <pre class="pd-pre" data-test="schema-pre">
+            {JSON.stringify(props.page.schemaOrg, null, 2)}
+          </pre>
+        </div>
+      </aside>
+    );
+  },
+});

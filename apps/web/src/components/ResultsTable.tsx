@@ -1,0 +1,205 @@
+// apps/web/src/components/ResultsTable.tsx
+import { computed, defineComponent, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
+import type { PageResult } from '@seo-crawler/shared';
+
+import { useCrawlSession } from '../stores/crawl';
+
+const PAGE_LIMIT = 50;
+
+type SortKey = 'url' | 'status' | 'title' | 'h1' | 'noindex' | 'depth' | 'contentType';
+type SortDir = 'asc' | 'desc';
+
+function statusClass(page: PageResult): string {
+  if (page.status === null) return 'badge-error';
+  if (page.status < 300) return 'badge-ok';
+  if (page.status < 400) return 'badge-redirect';
+  return 'badge-error';
+}
+
+function sortValue(page: PageResult, key: SortKey): string | number {
+  switch (key) {
+    case 'url':
+      return page.url;
+    case 'status':
+      return page.status ?? -1;
+    case 'title':
+      return page.title ?? '';
+    case 'h1':
+      return page.headings.h1[0] ?? '';
+    case 'noindex':
+      return page.noindex ? 1 : 0;
+    case 'depth':
+      return page.depth;
+    case 'contentType':
+      return page.contentType ?? '';
+  }
+}
+
+export default defineComponent({
+  name: 'ResultsTable',
+  setup() {
+    const { t } = useI18n();
+    const store = useCrawlSession();
+
+    const query = ref('');
+    const sortKey = ref<SortKey | null>(null);
+    const sortDir = ref<SortDir>('asc');
+
+    const filtered = computed(() => {
+      const q = query.value.trim().toLowerCase();
+      if (!q) return store.pages;
+      return store.pages.filter(
+        (p) =>
+          p.url.toLowerCase().includes(q) || (p.title ?? '').toLowerCase().includes(q),
+      );
+    });
+
+    const rows = computed(() => {
+      if (!sortKey.value) return [...filtered.value];
+      const dir = sortDir.value === 'asc' ? 1 : -1;
+      return [...filtered.value].sort((a, b) => {
+        const va = sortValue(a, sortKey.value as SortKey);
+        const vb = sortValue(b, sortKey.value as SortKey);
+        if (typeof va === 'number' && typeof vb === 'number') return (va - vb) * dir;
+        return String(va).localeCompare(String(vb)) * dir;
+      });
+    });
+
+    const hasPrev = computed(() => store.pageOffset > 0);
+    const hasNext = computed(() => store.pageOffset + store.pages.length < store.total);
+
+    function toggleSort(key: SortKey): void {
+      if (sortKey.value === key) {
+        sortDir.value = sortDir.value === 'asc' ? 'desc' : 'asc';
+      } else {
+        sortKey.value = key;
+        sortDir.value = 'asc';
+      }
+    }
+
+    function mark(key: SortKey): string {
+      if (sortKey.value !== key) return '';
+      return sortDir.value === 'asc' ? ' ↑' : ' ↓';
+    }
+
+    function goPrev(): void {
+      store.pageOffset = Math.max(0, store.pageOffset - PAGE_LIMIT);
+      void store.loadPages();
+    }
+
+    function goNext(): void {
+      store.pageOffset += PAGE_LIMIT;
+      void store.loadPages();
+    }
+
+    const header = (key: SortKey, labelKey: string) => (
+      <th data-test={`th-${key}`} onClick={() => toggleSort(key)}>
+        {t(labelKey)}
+        {mark(key)}
+      </th>
+    );
+
+    return () => (
+      <div class="results-panel">
+        <div class="table-toolbar">
+          <input
+            data-test="search"
+            class="table-search"
+            type="search"
+            placeholder={t('table.searchPlaceholder')}
+            value={query.value}
+            onInput={(e) => {
+              query.value = (e.target as HTMLInputElement).value;
+            }}
+          />
+          <span class="caption" data-test="total-count">
+            {store.total}
+          </span>
+        </div>
+
+        <table class="results-table">
+          <thead>
+            <tr>
+              {header('url', 'table.url')}
+              {header('status', 'table.status')}
+              {header('title', 'table.title')}
+              {header('h1', 'table.h1')}
+              {header('noindex', 'table.indexability')}
+              {header('depth', 'table.depth')}
+              {header('contentType', 'table.contentType')}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.value.length === 0 ? (
+              <tr>
+                <td class="table-empty" colspan={7}>
+                  {t('table.empty')}
+                </td>
+              </tr>
+            ) : (
+              rows.value.map((page) => (
+                <tr
+                  key={page.url}
+                  data-test="row"
+                  class="table-row"
+                  onClick={() => {
+                    store.selectedUrl = page.url;
+                  }}
+                >
+                  <td class="url-cell" data-test="cell-url">
+                    {page.url}
+                  </td>
+                  <td>
+                    <span class={`badge ${statusClass(page)}`} data-test="status-badge">
+                      {page.status !== null ? String(page.status) : (page.error ?? t('table.error'))}
+                    </span>
+                  </td>
+                  <td data-test="cell-title">{page.title ?? '—'}</td>
+                  <td data-test="cell-h1">{page.headings.h1[0] ?? '—'}</td>
+                  <td>
+                    {page.noindex ? (
+                      <span class="badge badge-error" data-test="badge-noindex">
+                        {t('table.noindex')}
+                      </span>
+                    ) : null}
+                  </td>
+                  <td data-test="cell-depth">{page.depth}</td>
+                  <td class="type-cell" data-test="cell-content-type">
+                    {page.contentType ?? '—'}
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+
+        <div class="table-pagination">
+          <button
+            type="button"
+            class="btn-page"
+            data-test="prev-page"
+            disabled={!hasPrev.value}
+            onClick={goPrev}
+          >
+            {t('table.prev')}
+          </button>
+          <span class="caption">
+            {store.pages.length === 0
+              ? `0 / ${store.total}`
+              : `${store.pageOffset + 1}–${store.pageOffset + store.pages.length} / ${store.total}`}
+          </span>
+          <button
+            type="button"
+            class="btn-page"
+            data-test="next-page"
+            disabled={!hasNext.value}
+            onClick={goNext}
+          >
+            {t('table.next')}
+          </button>
+        </div>
+      </div>
+    );
+  },
+});

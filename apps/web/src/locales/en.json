@@ -40,9 +40,61 @@
     "done": "Done",
     "stopped": "Stopped"
   },
+  "tabs": {
+    "internal": "Internal",
+    "external": "External",
+    "images": "Images",
+    "issues": "Issues"
+  },
+  "table": {
+    "url": "URL",
+    "status": "Status",
+    "title": "Title",
+    "h1": "H1",
+    "indexability": "Indexability",
+    "depth": "Depth",
+    "contentType": "Content type",
+    "noindex": "noindex",
+    "searchPlaceholder": "Search by URL or title",
+    "prev": "Prev",
+    "next": "Next",
+    "error": "Error",
+    "empty": "No pages to display"
+  },
+  "details": {
+    "close": "Close",
+    "url": "URL",
+    "status": "Status",
+    "error": "Error",
+    "metadata": "Metadata",
+    "title": "Title",
+    "description": "Description",
+    "metaRobots": "Meta robots",
+    "canonical": "Canonical",
+    "contentType": "Content type",
+    "size": "Size",
+    "responseTime": "Response time",
+    "depth": "Depth",
+    "rendered": "JS rendering",
+    "yes": "yes",
+    "no": "no",
+    "headings": "Headings",
+    "images": "Images",
+    "noAlt": "no alt",
+    "internalLinks": "Internal links",
+    "externalLinks": "External links",
+    "schema": "Schema.org",
+    "noindex": "noindex",
+    "nofollow": "nofollow"
+  },
   "issues": {
     "brokenLink": "Broken links",
     "duplicateTitle": "Duplicate titles",
-    "noindex": "noindex"
+    "duplicateDescription": "Duplicate descriptions",
+    "duplicateH1": "Duplicate H1",
+    "missingH1": "Missing H1",
+    "missingAlt": "Images without alt",
+    "noindex": "noindex",
+    "empty": "No issues found"
   }
 }

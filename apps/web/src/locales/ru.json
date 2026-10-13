@@ -40,9 +40,61 @@
     "done": "Завершено",
     "stopped": "Остановлено"
   },
+  "tabs": {
+    "internal": "Внутренние",
+    "external": "Внешние",
+    "images": "Картинки",
+    "issues": "Проблемы"
+  },
+  "table": {
+    "url": "URL",
+    "status": "Статус",
+    "title": "Title",
+    "h1": "H1",
+    "indexability": "Индексация",
+    "depth": "Глубина",
+    "contentType": "Тип контента",
+    "noindex": "noindex",
+    "searchPlaceholder": "Поиск по URL или title",
+    "prev": "Назад",
+    "next": "Вперёд",
+    "error": "Ошибка",
+    "empty": "Нет страниц для отображения"
+  },
+  "details": {
+    "close": "Закрыть",
+    "url": "URL",
+    "status": "Статус",
+    "error": "Ошибка",
+    "metadata": "Метаданные",
+    "title": "Title",
+    "description": "Description",
+    "metaRobots": "Meta robots",
+    "canonical": "Canonical",
+    "contentType": "Тип контента",
+    "size": "Размер",
+    "responseTime": "Время ответа",
+    "depth": "Глубина",
+    "rendered": "JS-рендеринг",
+    "yes": "да",
+    "no": "нет",
+    "headings": "Заголовки",
+    "images": "Картинки",
+    "noAlt": "без alt",
+    "internalLinks": "Внутренние ссылки",
+    "externalLinks": "Внешние ссылки",
+    "schema": "Schema.org",
+    "noindex": "noindex",
+    "nofollow": "nofollow"
+  },
   "issues": {
     "brokenLink": "Битые ссылки",
     "duplicateTitle": "Дубли title",
-    "noindex": "noindex"
+    "duplicateDescription": "Дубли description",
+    "duplicateH1": "Дубли H1",
+    "missingH1": "Отсутствует H1",
+    "missingAlt": "Картинки без alt",
+    "noindex": "noindex",
+    "empty": "Проблем не найдено"
   }
 }

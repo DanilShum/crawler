@@ -187,4 +187,26 @@ describe('useCrawlSession', () => {
     });
     expect(store.tab).toBe('external');
   });
+
+  it('loadPages учитывает pageOffset из стора', async () => {
+    const store = useCrawlSession();
+    store.open('s1');
+
+    store.pageOffset = 50;
+    await store.loadPages();
+
+    const pagesCalls = calledUrls().filter((u) => u.startsWith('/api/crawl/s1/pages'));
+    expect(pagesCalls.length).toBeGreaterThanOrEqual(2);
+    expect(pagesCalls[pagesCalls.length - 1]).toContain('offset=50');
+  });
+
+  it('setTab сбрасывает pageOffset в 0', () => {
+    const store = useCrawlSession();
+    store.open('s1');
+
+    store.pageOffset = 100;
+    store.setTab('external');
+
+    expect(store.pageOffset).toBe(0);
+  });
 });
