@@ -26,6 +26,11 @@ export function computeIssues(results: PageResult[], linkStatuses: Map<string, n
     if (g.sampleUrls.length < MAX_SAMPLES) g.sampleUrls.push(url);
   };
 
+  // missing-h1/missing-alt имеют смысл только для загруженных HTML-страниц:
+  // не-HTML (pdf, text/plain) и ошибочные (status=null) страницы не парсились.
+  const isHtml = (r: PageResult): boolean =>
+    r.status !== null && (r.contentType ?? '').startsWith('text/html');
+
   // Первый проход: подсчёт повторов title/description/h1
   const titleCounts = new Map<string, number>();
   const descCounts = new Map<string, number>();
@@ -54,8 +59,8 @@ export function computeIssues(results: PageResult[], linkStatuses: Map<string, n
     const h1Key = r.headings.h1.join('\n');
     if (h1Key !== '' && (h1Counts.get(h1Key) ?? 0) > 1) add('duplicate-h1', r.url);
 
-    if (r.headings.h1.length === 0) add('missing-h1', r.url);
-    if (r.images.some((i) => i.alt === null)) add('missing-alt', r.url);
+    if (isHtml(r) && r.headings.h1.length === 0) add('missing-h1', r.url);
+    if (isHtml(r) && r.images.some((i) => i.alt === null)) add('missing-alt', r.url);
     if (r.noindex) add('noindex', r.url);
   }
 

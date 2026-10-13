@@ -8,41 +8,56 @@ const HEADER =
   'content_type,size_bytes,response_time_ms,noindex,nofollow,rendered,' +
   'h1_count,images_without_alt,internal_links,external_links';
 
+// Текстовые колонки, значения которых может подставить сайт: их защищаем от
+// CSV-формульной инъекции (=, +, - или @ в начале → префикс апострофа).
+// Числовые и boolean колонки подстановке не подвержены и не трогаются.
+const TEXT_FIELDS = new Set([
+  'url',
+  'error',
+  'title',
+  'description',
+  'metaRobots',
+  'canonical',
+  'contentType',
+]);
+
 /**
- * Экранирование поля по RFC 4180: значение с запятой, кавычкой или
- * переносом строки обрамляется кавычками, внутренние кавычки удваиваются.
- * null → пустая строка, boolean → true/false.
+ * Экранирование ячейки по RFC 4180: значение с запятой, кавычкой или переносом
+ * строки обрамляется кавычками, внутренние кавычки удваиваются. Для текстовых
+ * полей дополнительно нейтрализуется формульная инъекция: `=`, `+`, `-` или `@`
+ * в начале строки получают префикс апострофа. null → пустая строка, boolean → true/false.
  */
-function escapeField(value: string | number | boolean | null): string {
+function escapeField(value: string | number | boolean | null, text = false): string {
   if (value === null) return '';
   const s = String(value);
-  if (/[",\n\r]/.test(s)) {
-    return '"' + s.replace(/"/g, '""') + '"';
+  const safe = text && /^[=+\-@]/.test(s) ? `'${s}` : s;
+  if (/[",\n\r]/.test(safe)) {
+    return '"' + safe.replace(/"/g, '""') + '"';
   }
-  return s;
+  return safe;
 }
 
 function toRow(p: PageResult): string {
   return [
-    p.url,
-    p.status,
-    p.error,
-    p.depth,
-    p.title,
-    p.description,
-    p.metaRobots,
-    p.canonical,
-    p.contentType,
-    p.sizeBytes,
-    p.responseTimeMs,
-    p.noindex,
-    p.nofollow,
-    p.rendered,
-    p.headings.h1.length,
-    p.images.filter((i) => i.alt === null).length,
-    p.internalLinks.length,
-    p.externalLinks.length,
-  ].map(escapeField).join(',');
+    escapeField(p.url, TEXT_FIELDS.has('url')),
+    escapeField(p.status),
+    escapeField(p.error, TEXT_FIELDS.has('error')),
+    escapeField(p.depth),
+    escapeField(p.title, TEXT_FIELDS.has('title')),
+    escapeField(p.description, TEXT_FIELDS.has('description')),
+    escapeField(p.metaRobots, TEXT_FIELDS.has('metaRobots')),
+    escapeField(p.canonical, TEXT_FIELDS.has('canonical')),
+    escapeField(p.contentType, TEXT_FIELDS.has('contentType')),
+    escapeField(p.sizeBytes),
+    escapeField(p.responseTimeMs),
+    escapeField(p.noindex),
+    escapeField(p.nofollow),
+    escapeField(p.rendered),
+    escapeField(p.headings.h1.length),
+    escapeField(p.images.filter((i) => i.alt === null).length),
+    escapeField(p.internalLinks.length),
+    escapeField(p.externalLinks.length),
+  ].join(',');
 }
 
 /** Сериализует результаты краула в CSV (BOM + заголовок + строки, LF-разделитель). */

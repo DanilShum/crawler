@@ -140,4 +140,26 @@ describe('computeIssues', () => {
 
     expect(issues).toEqual([]);
   });
+
+  it('missing-h1/missing-alt не считаются для не-HTML и ошибочных страниц', () => {
+    // 404 с text/plain (как /missing в фикстуре): HTML не парсится — missing-h1 нет.
+    const txt404 = page({ url: `${BASE}/txt404`, status: 404, contentType: 'text/plain; charset=utf-8' });
+    // Сетевая ошибка (status=null, без контента): тоже без missing-h1/missing-alt.
+    const errPage = page({
+      url: `${BASE}/err`,
+      status: null,
+      error: 'dns',
+      contentType: null,
+      images: [imgNoAlt],
+      headings: { h1: ['Not really'], h2: [], h3: [], h4: [], h5: [], h6: [] },
+    });
+    // Контрольная HTML-страница без h1 — единственная, кто даёт missing-h1.
+    const htmlPage = page({ url: `${BASE}/html`, contentType: 'text/html; charset=utf-8' });
+
+    const issues = computeIssues([txt404, errPage, htmlPage], new Map());
+    const by = byKind(issues);
+
+    expect(by.get('missing-h1')).toEqual({ kind: 'missing-h1', count: 1, sampleUrls: [`${BASE}/html`] });
+    expect(by.get('missing-alt')).toBeUndefined();
+  });
 });

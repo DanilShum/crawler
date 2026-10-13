@@ -83,6 +83,23 @@ describe('toCsv', () => {
     expect(dataLine).toBe('https://a.test/,,timeout,0,,,,,,100,10,false,false,false,0,0,0,0');
   });
 
+  it('защищает текстовые поля от formula injection (префикс апострофа)', () => {
+    const p = page({
+      url: 'https://a.test/',
+      title: '=HYPERLINK("x")',
+      description: '-sum',
+      metaRobots: '@noindex',
+      canonical: '=CMD',
+    });
+    const body = toCsv([p]).slice(BOM.length);
+    const dataLine = body.split('\n')[1];
+    // =,+,-,@ в начале текстовых полей получают префикс '; числовые/boolean не трогаются,
+    // url (начинается с http) не пострадал. Кавычка внутри title экранируется по RFC 4180.
+    expect(dataLine).toBe(
+      'https://a.test/,200,,0,"\'=HYPERLINK(""x"")",\'-sum,\'@noindex,\'=CMD,text/html,100,10,false,false,false,0,0,0,0',
+    );
+  });
+
   it('booleans → true/false; счётчики считаются из массивов', () => {
     const p = page({
       url: 'https://a.test/',

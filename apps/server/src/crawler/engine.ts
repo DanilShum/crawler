@@ -27,6 +27,8 @@ export class Crawler {
   private readonly fetcher: Fetcher;
   private readonly emit: (e: EngineEvent) => void;
   private readonly queue: QueueItem[] = [];
+  private queueHead = 0;
+  private errors = 0;
   private readonly seen = new Set<string>();
   private readonly results = new Map<string, PageResult>();
   private readonly checkedLinks = new Set<string>();
@@ -91,7 +93,7 @@ export class Crawler {
         const url = normalizeUrl(raw, this.origin);
         if (url) this.enqueue(url, 0);
       }
-      return this.queue.length > 0;
+      return this.pendingCount() > 0;
     }
     this.enqueue(this.options.startUrl, 0);
     return true;
@@ -101,6 +103,28 @@ export class Crawler {
     if (this.seen.has(url)) return;
     this.seen.add(url);
     this.queue.push({ url, depth });
+  }
+
+  /** Deque-подобный выбор: head-индекс вместо shift() (O(1) на элемент, O(n) амортизировано). */
+  private dequeue(): QueueItem | undefined {
+    if (this.queueHead >= this.queue.length) {
+      this.queue.length = 0;
+      this.queueHead = 0;
+      return undefined;
+    }
+    const item = this.queue[this.queueHead];
+    this.queueHead++;
+    // Уплотняем массив, когда прочитанная часть занимает заметную долю.
+    if (this.queueHead > 4096 && this.queueHead * 2 > this.queue.length) {
+      this.queue.splice(0, this.queueHead);
+      this.queueHead = 0;
+    }
+    return item;
+  }
+
+  /** Число ещё не выбранных из очереди элементов. */
+  private pendingCount(): number {
+    return this.queue.length - this.queueHead;
   }
 
   private robotsAllowed(url: string): boolean {
@@ -132,7 +156,7 @@ export class Crawler {
   private async worker(): Promise<void> {
     for (;;) {
       if (this.stopped || this.results.size >= this.options.maxUrls) return;
-      const item = this.queue.shift();
+      const item = this.dequeue();
       if (!item) {
         // Очередь пуста, но другой воркер может ещё обрабатывать страницу и пополнить её.
         if (this.inFlight === 0) return;
@@ -254,17 +278,16 @@ export class Crawler {
     if (this.results.size >= this.options.maxUrls && !this.results.has(result.url)) {
       return false;
     }
+    const isNew = !this.results.has(result.url);
     this.results.set(result.url, result);
+    if (isNew && result.status === null) this.errors++;
     this.emit({ type: 'page', result });
     this.emitProgress();
     return true;
   }
 
   private emitProgress(): void {
-    let errors = 0;
-    for (const r of this.results.values()) {
-      if (r.status === null) errors++;
-    }
-    this.emit({ type: 'progress', crawled: this.results.size, queued: this.queue.length, errors });
+    // errors — инкрементальный счётчик (см. record), без повторного сканирования результатов.
+    this.emit({ type: 'progress', crawled: this.results.size, queued: this.pendingCount(), errors: this.errors });
   }
 }
