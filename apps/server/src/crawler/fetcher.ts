@@ -1,4 +1,4 @@
-import { fetch as undiciFetch } from 'undici';
+import { fetch as undiciFetch, EnvHttpProxyAgent, type Dispatcher } from 'undici';
 
 export interface FetchOutcome {
   status: number | null;
@@ -30,12 +30,23 @@ function classifyFetchError(err: unknown): string {
 }
 
 export class HttpFetcher implements Fetcher {
+  // undici игнорирует HTTP(S)_PROXY из окружения — в корпоративных сетях за
+  // прокси прямые соединения режутся файрволом. EnvHttpProxyAgent читает
+  // HTTP_PROXY/HTTPS_PROXY/NO_PROXY и проксирует соответствующие запросы.
+  private static proxyAgent: EnvHttpProxyAgent | null = null;
+  private static dispatcher(): Dispatcher | undefined {
+    const hasProxy = ['HTTPS_PROXY', 'https_proxy', 'HTTP_PROXY', 'http_proxy'].some((k) => process.env[k]);
+    if (!hasProxy) return undefined;
+    HttpFetcher.proxyAgent ??= new EnvHttpProxyAgent();
+    return HttpFetcher.proxyAgent;
+  }
+
   async fetch(url: string, timeoutMs: number): Promise<FetchOutcome> {
     const started = Date.now();
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeoutMs);
     try {
-      const res = await undiciFetch(url, { redirect: 'follow', signal: controller.signal });
+      const res = await undiciFetch(url, { redirect: 'follow', signal: controller.signal, dispatcher: HttpFetcher.dispatcher() });
       const body = await res.text();
       const finalUrl = res.url || url;
       const redirected = finalUrl !== url;
