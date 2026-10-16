@@ -1,10 +1,10 @@
-// apps/web/src/components/ResultsTable.tsx
+// apps/web/src/components/results-table.tsx
 import { computed, defineComponent, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { PageResult } from '@seo-crawler/shared';
 
-import { useCrawlSession } from '../stores/crawl';
-import { statusClass } from '../helpers';
+import { useCrawlSession } from '../../stores/crawl';
+import { statusClass } from '../../helpers';
 
 const PAGE_LIMIT = 50;
 

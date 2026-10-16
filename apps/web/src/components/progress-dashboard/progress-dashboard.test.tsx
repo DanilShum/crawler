@@ -1,14 +1,14 @@
-// apps/web/src/components/ProgressDashboard.test.tsx
+// apps/web/src/components/progress-dashboard.test.tsx
 import { describe, it, expect, vi } from 'vitest';
 import type { Mock } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { createPinia, setActivePinia } from 'pinia';
 import { createI18n } from 'vue-i18n';
-import ProgressDashboard from './ProgressDashboard';
-import { useCrawlSession, type CrawlProgress } from '../stores/crawl';
+import ProgressDashboard from './progress-dashboard';
+import { useCrawlSession, type CrawlProgress } from '../../stores/crawl';
 import type { Issue } from '@seo-crawler/shared';
-import ru from '../locales/ru.json';
-import en from '../locales/en.json';
+import ru from '../../locales/ru.json';
+import en from '../../locales/en.json';
 
 const i18n = createI18n({ legacy: false, locale: 'ru', messages: { ru, en } });
 

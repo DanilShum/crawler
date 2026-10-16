@@ -1,4 +1,4 @@
-// apps/web/src/components/CrawlForm.tsx
+// apps/web/src/components/crawl-form.tsx
 import { defineComponent, ref, type PropType, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { CrawlMode, CrawlOptions } from '@seo-crawler/shared';

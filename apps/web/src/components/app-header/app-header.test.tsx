@@ -1,10 +1,10 @@
-// apps/web/src/components/AppHeader.test.tsx
+// apps/web/src/components/app-header.test.tsx
 import { describe, it, expect } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
-import AppHeader from './AppHeader';
-import ru from '../locales/ru.json';
-import en from '../locales/en.json';
+import AppHeader from './app-header';
+import ru from '../../locales/ru.json';
+import en from '../../locales/en.json';
 
 const i18n = createI18n({ legacy: false, locale: 'ru', messages: { ru, en } });
 

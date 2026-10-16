@@ -4,9 +4,9 @@ import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import type { Issue } from '@seo-crawler/shared';
 
-import ProgressDashboard from '../components/ProgressDashboard';
-import ResultsTable from '../components/ResultsTable';
-import PageDetails from '../components/PageDetails';
+import ProgressDashboard from '../components/progress-dashboard';
+import ResultsTable from '../components/results-table';
+import PageDetails from '../components/page-details';
 import { useCrawlSession } from '../stores/crawl';
 import { TABS } from '../constants';
 import { exportUrl, stopCrawl } from '../api/client';

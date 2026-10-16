@@ -1,8 +1,8 @@
 import { defineComponent } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import logoUrl from '../assets/spider-logo.svg';
-import { ROUTES } from '../router/routes';
+import logoUrl from '../../assets/spider-logo.svg';
+import { ROUTES } from '../../router/routes';
 
 // Навигационная ссылка: RouterLink при установленном роутере,
 // обычный <a> — без него (например, в изолированном юнит-тесте).

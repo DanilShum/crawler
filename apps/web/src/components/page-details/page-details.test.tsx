@@ -1,12 +1,12 @@
-// apps/web/src/components/PageDetails.test.tsx
+// apps/web/src/components/page-details.test.tsx
 import { describe, expect, it, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
 import type { PageResult } from '@seo-crawler/shared';
 
-import PageDetails from './PageDetails';
-import ru from '../locales/ru.json';
-import en from '../locales/en.json';
+import PageDetails from './page-details';
+import ru from '../../locales/ru.json';
+import en from '../../locales/en.json';
 
 const i18n = createI18n({ legacy: false, locale: 'ru', messages: { ru, en } });
 

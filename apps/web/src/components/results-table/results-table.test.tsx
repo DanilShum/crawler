@@ -1,14 +1,14 @@
-// apps/web/src/components/ResultsTable.test.tsx
+// apps/web/src/components/results-table.test.tsx
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { createPinia, setActivePinia } from 'pinia';
 import { createI18n } from 'vue-i18n';
 import type { PageResult, PageWithIssues } from '@seo-crawler/shared';
 
-import ResultsTable from './ResultsTable';
-import { useCrawlSession } from '../stores/crawl';
-import ru from '../locales/ru.json';
-import en from '../locales/en.json';
+import ResultsTable from './results-table';
+import { useCrawlSession } from '../../stores/crawl';
+import ru from '../../locales/ru.json';
+import en from '../../locales/en.json';
 
 const i18n = createI18n({ legacy: false, locale: 'ru', messages: { ru, en } });
 

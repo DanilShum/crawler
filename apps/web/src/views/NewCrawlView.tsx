@@ -3,7 +3,7 @@ import { defineComponent, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import type { CrawlOptions } from '@seo-crawler/shared';
-import CrawlForm from '../components/CrawlForm';
+import CrawlForm from '../components/crawl-form';
 import { startCrawl } from '../api/client';
 
 export default defineComponent({

@@ -1,11 +1,11 @@
-// apps/web/src/components/CrawlForm.test.tsx
+// apps/web/src/components/crawl-form.test.tsx
 import { describe, it, expect, vi } from 'vitest';
 import type { Mock } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
-import CrawlForm from './CrawlForm';
-import ru from '../locales/ru.json';
-import en from '../locales/en.json';
+import CrawlForm from './crawl-form';
+import ru from '../../locales/ru.json';
+import en from '../../locales/en.json';
 
 const i18n = createI18n({ legacy: false, locale: 'ru', messages: { ru, en } });
 

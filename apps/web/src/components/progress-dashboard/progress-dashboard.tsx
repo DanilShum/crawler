@@ -1,9 +1,9 @@
-// apps/web/src/components/ProgressDashboard.tsx
+// apps/web/src/components/progress-dashboard.tsx
 import { computed, defineComponent, type PropType } from 'vue';
 import { useI18n } from 'vue-i18n';
 import type { IssueKind } from '@seo-crawler/shared';
 
-import { useCrawlSession } from '../stores/crawl';
+import { useCrawlSession } from '../../stores/crawl';
 
 type StopHandler = () => Promise<void>;
 

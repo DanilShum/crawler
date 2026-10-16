@@ -1,10 +1,10 @@
-// apps/web/src/components/PageDetails.tsx
+// apps/web/src/components/page-details.tsx
 import { computed, defineComponent, type PropType } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { statusClass, formatBytes } from '../helpers';
+import { statusClass, formatBytes } from '../../helpers';
 import { type HeadingLevel, type IssueKind, type LinkInfo, type PageResult } from '@seo-crawler/shared';
 
-import { ISSUE_LABELS } from '../constants';
+import { ISSUE_LABELS } from '../../constants';
 
 type BrokenLink = { url: string; status: number | null };
 

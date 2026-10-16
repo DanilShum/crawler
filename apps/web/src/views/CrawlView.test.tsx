@@ -7,7 +7,7 @@ import { createI18n } from 'vue-i18n';
 import type { Issue, PageResult } from '@seo-crawler/shared';
 
 import CrawlView from './CrawlView';
-import ProgressDashboard from '../components/ProgressDashboard';
+import ProgressDashboard from '../components/progress-dashboard';
 import { useCrawlSession, type CrawlTab } from '../stores/crawl';
 import ru from '../locales/ru.json';
 import en from '../locales/en.json';
