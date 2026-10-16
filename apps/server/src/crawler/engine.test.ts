@@ -102,6 +102,15 @@ describe('Crawler spider', () => {
     expect(pages[0].error).toBe('connection');
   });
 
+  it('favicon с относительным href нормализуется в абсолютный URL', async () => {
+    const site = await startTestSite();
+    try {
+      const { pages } = await run(site.origin, opts(site.origin, { maxUrls: 5 }));
+      const about = pages.find((p) => p.url.endsWith('/about'))!;
+      expect(about.favicon).toBe(site.origin + '/favicon.ico');
+    } finally { await site.close(); }
+  });
+
   it('respectRobots=false обходит запрещённые пути', async () => {
     const site = await startTestSite();
     try {

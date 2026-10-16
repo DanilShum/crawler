@@ -214,7 +214,9 @@ export class Crawler {
       result.openGraph = parsed.openGraph;
       result.twitter = parsed.twitter;
       result.hreflang = parsed.hreflang;
-      result.favicon = parsed.favicon;
+      // favicon нормализуем против финального URL — иначе относительный href
+      // фронтенд резолвит против своего origin и превью ломается
+      result.favicon = parsed.favicon === null ? null : normalizeUrl(parsed.favicon, outcome.finalUrl);
       result.wordCount = parsed.wordCount;
       result.lang = parsed.lang;
       result.headingOrder = parsed.headingOrder;

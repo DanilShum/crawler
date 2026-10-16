@@ -39,7 +39,9 @@ function noindexHtml(): string {
 
 function aboutHtml(): string {
   return [
-    '<html><head><title>About</title></head><body>',
+    '<html><head><title>About</title>',
+    '<link rel="icon" href="/favicon.ico">',
+    '</head><body>',
     '<h1>About</h1>',
     '<img src="/logo.png" alt="">',
     '<img src="/pic.png">',
