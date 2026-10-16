@@ -48,6 +48,10 @@ body {
   padding: 12px 24px;
   background: #ffffff;
   border-bottom: 1px solid var(--border);
+  /* шапка прилипает к верху — под ней закрепляется панель деталей */
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .app-title {
@@ -588,11 +592,21 @@ pre,
 
 .page-details {
   position: sticky;
-  top: 16px;
+  /* высота шапки ~56px + зазор 8px: панель прилипает сразу под шапкой */
+  top: 64px;
+  /* по высоте экрана: шапка + зазоры сверху/снизу, излишек скрыт */
+  max-height: calc(100vh - 80px);
+  display: flex;
+  flex-direction: column;
   background: #ffffff;
   border: 1px solid var(--border);
   border-radius: 10px;
   overflow: hidden;
+}
+
+.pd-body {
+  overflow-y: auto;
+  min-height: 0; /* разрешает сжаться внутри flex-колонки, включает скролл */
 }
 
 .pd-header {
@@ -602,6 +616,7 @@ pre,
   gap: 10px;
   padding: 12px 14px;
   border-bottom: 1px solid var(--border);
+  flex-shrink: 0; /* URL и кнопка закрытия не уезжают при скролле секций */
 }
 
 .pd-url {
