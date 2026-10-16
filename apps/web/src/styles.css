@@ -54,6 +54,12 @@ body {
   z-index: 10;
 }
 
+.app-logo {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+}
+
 .app-title {
   margin: 0;
   font-size: 18px;
@@ -355,7 +361,7 @@ pre,
 }
 
 .crawl-layout.with-details {
-  grid-template-columns: 220px minmax(0, 1fr) 360px;
+  grid-template-columns: 220px minmax(0, 1fr) 40vw;
 }
 
 .crawl-sidebar {

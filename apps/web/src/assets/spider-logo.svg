@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-90 -48 180 112">
+  <!-- задние лапы -->
+  <g stroke="#5a52b8" stroke-width="8" stroke-linecap="round" fill="none" opacity="0.92">
+    <path d="M10,26 C26,44 40,52 60,58"/>
+    <path d="M-10,26 C-26,44 -40,52 -60,58"/>
+  </g>
+  <!-- средние лапы -->
+  <g stroke="#4a43a8" stroke-width="9" stroke-linecap="round" fill="none" opacity="0.95">
+    <path d="M12,10 C40,-6 62,-10 82,-4"/>
+    <path d="M-12,10 C-40,-6 -62,-10 -82,-4"/>
+  </g>
+  <!-- передние лапы -->
+  <g stroke="#3c3489" stroke-width="10" stroke-linecap="round" fill="none">
+    <path d="M10,-14 C34,-34 56,-38 78,-30"/>
+    <path d="M-10,-14 C-34,-34 -56,-38 -78,-30"/>
+  </g>
+  <!-- вторые/пятые лапы -->
+  <g stroke="#6a62c8" stroke-width="8" stroke-linecap="round" fill="none" opacity="0.9">
+    <path d="M14,-2 C36,6 52,16 70,22"/>
+    <path d="M-14,-2 C-36,6 -52,16 -70,22"/>
+  </g>
+
+  <!-- корпус: объёмные грани -->
+  <g>
+    <polygon points="0,-34 18,-20 18,8 0,14" fill="#7F77DD"/>
+    <polygon points="0,-34 -18,-20 -18,8 0,14" fill="#9790E8"/>
+    <polygon points="0,-34 18,-20 0,-6" fill="#6B63C9"/>
+    <polygon points="0,-34 -18,-20 0,-6" fill="#5A52B8"/>
+    <polygon points="0,14 18,8 18,24 0,34" fill="#534AB7"/>
+    <polygon points="0,14 -18,8 -18,24 0,34" fill="#6B63C9"/>
+  </g>
+
+  <!-- центральная складка -->
+  <g stroke="#3C3489" stroke-width="1.4" fill="none" opacity="0.9">
+    <line x1="0" y1="-34" x2="0" y2="34"/>
+    <line x1="0" y1="-6" x2="18" y2="-20"/>
+    <line x1="0" y1="-6" x2="-18" y2="-20"/>
+    <line x1="0" y1="-6" x2="18" y2="8"/>
+    <line x1="0" y1="-6" x2="-18" y2="8"/>
+    <line x1="0" y1="14" x2="18" y2="8"/>
+    <line x1="0" y1="14" x2="-18" y2="8"/>
+  </g>
+
+  <!-- глаза -->
+  <g fill="#1E1838">
+    <circle cx="-7" cy="-24" r="2.8"/>
+    <circle cx="7" cy="-24" r="2.8"/>
+  </g>
+  <g fill="#ffffff">
+    <circle cx="-8" cy="-25" r="1"/>
+    <circle cx="6" cy="-25" r="1"/>
+  </g>
+</svg>

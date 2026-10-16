@@ -1,6 +1,7 @@
 import { defineComponent } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+import logoUrl from '../assets/spider-logo.svg';
 
 // Навигационная ссылка: RouterLink при установленном роутере,
 // обычный <a> — без него (например, в изолированном юнит-тесте).
@@ -28,6 +29,7 @@ export default defineComponent({
     };
     return () => (
       <header class="app-header">
+        <img class="app-logo" src={logoUrl} alt="" />
         <h1 class="app-title">{t('header.title')}</h1>
         <nav class="app-nav">
           <Navlink to="/" data-test="nav-new-crawl">

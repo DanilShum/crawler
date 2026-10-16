@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <g transform="translate(50,50)">
+    <g stroke="#5a52b8" stroke-width="9" stroke-linecap="round" fill="none" opacity="0.92">
+      <path d="M10,16 C22,28 34,34 46,38"/>
+      <path d="M-10,16 C-22,28 -34,34 -46,38"/>
+    </g>
+    <g stroke="#4a43a8" stroke-width="11" stroke-linecap="round" fill="none" opacity="0.95">
+      <path d="M12,4 C30,-6 46,-8 60,-4"/>
+      <path d="M-12,4 C-30,-6 -46,-8 -60,-4"/>
+    </g>
+    <g stroke="#3c3489" stroke-width="12" stroke-linecap="round" fill="none">
+      <path d="M8,-10 C24,-24 42,-28 58,-22"/>
+      <path d="M-8,-10 C-24,-24 -42,-28 -58,-22"/>
+    </g>
+    <g>
+      <polygon points="0,-26 15,-16 15,4 0,8" fill="#7F77DD"/>
+      <polygon points="0,-26 -15,-16 -15,4 0,8" fill="#9790E8"/>
+      <polygon points="0,-26 15,-16 0,-4" fill="#6B63C9"/>
+      <polygon points="0,-26 -15,-16 0,-4" fill="#5A52B8"/>
+      <polygon points="0,-4 15,4 15,14 0,18" fill="#534AB7"/>
+      <polygon points="0,-4 -15,4 -15,14 0,18" fill="#6B63C9"/>
+    </g>
+    <g stroke="#3C3489" stroke-width="1.4" fill="none" opacity="0.9">
+      <line x1="0" y1="-26" x2="0" y2="18"/>
+      <line x1="0" y1="-4" x2="15" y2="-16"/>
+      <line x1="0" y1="-4" x2="-15" y2="-16"/>
+      <line x1="0" y1="-4" x2="15" y2="4"/>
+      <line x1="0" y1="-4" x2="-15" y2="4"/>
+    </g>
+    <g fill="#1E1838" transform="translate(0,2)">
+      <circle cx="-6" cy="-18" r="2.8"/>
+      <circle cx="6" cy="-18" r="2.8"/>
+    </g>
+    <g fill="#ffffff">
+      <circle cx="-7" cy="-19" r="1"/>
+      <circle cx="5" cy="-19" r="1"/>
+    </g>
+  </g>
+</svg>
