@@ -180,3 +180,16 @@ describe('PageDetails: обогащённые данные', () => {
     expect(w.find('img[data-test="details-favicon"]').exists()).toBe(false);
   });
 });
+
+describe('PageDetails: внутренний скролл', () => {
+  it('секции обёрнуты в скролл-область, заголовок панели — вне её', () => {
+    const w = mount(PageDetails, { props: { page }, global: { plugins: [i18n] } });
+    const body = w.find('.pd-body');
+    expect(body.exists()).toBe(true);
+    // метаданные внутри скролл-области...
+    expect(body.find('[data-test="meta-title"]').exists()).toBe(true);
+    // ...а шапка с URL и кнопкой закрытия — снаружи
+    expect(body.find('.pd-header').exists()).toBe(false);
+    expect(w.find('.page-details > .pd-header').exists()).toBe(true);
+  });
+});
