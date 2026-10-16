@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { createPinia, setActivePinia } from 'pinia';
 import { createI18n } from 'vue-i18n';
-import type { PageResult } from '@seo-crawler/shared';
+import type { PageResult, PageWithIssues } from '@seo-crawler/shared';
 
 import ResultsTable from './ResultsTable';
 import { useCrawlSession } from '../stores/crawl';
@@ -12,7 +12,7 @@ import en from '../locales/en.json';
 
 const i18n = createI18n({ legacy: false, locale: 'ru', messages: { ru, en } });
 
-function makePage(over: Partial<PageResult> = {}): PageResult {
+function makePage(over: Partial<PageResult> = {}): PageWithIssues {
   const base: PageResult = {
     url: 'http://example.com/a',
     status: 200,
@@ -43,7 +43,7 @@ function makePage(over: Partial<PageResult> = {}): PageResult {
   lang: null,
   headingOrder: [],
   };
-  return { ...base, ...over };
+  return { ...base, issues: [], ...over };
 }
 
 function jsonResponse(body: unknown): Response {
@@ -56,7 +56,7 @@ function jsonResponse(body: unknown): Response {
   } as unknown as Response;
 }
 
-function mountTable(pages: PageResult[]) {
+function mountTable(pages: PageWithIssues[]) {
   const pinia = createPinia();
   setActivePinia(pinia);
   const store = useCrawlSession();

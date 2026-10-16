@@ -193,3 +193,22 @@ describe('PageDetails: внутренний скролл', () => {
     expect(w.find('.page-details > .pd-header').exists()).toBe(true);
   });
 });
+
+describe('PageDetails: проблемы страницы', () => {
+  it('рендерит чипы всех проблем страницы', () => {
+    const w = mount(PageDetails, {
+      props: { page, issues: ['missing-lang', 'heading-order', 'noindex'] },
+      global: { plugins: [i18n] },
+    });
+    const chips = w.findAll('[data-test="page-issue"]');
+    expect(chips).toHaveLength(3);
+    expect(chips[0].text()).toBe('Отсутствует lang');
+    expect(chips[1].text()).toBe('Нарушен порядок заголовков');
+    expect(chips[2].text()).toBe('noindex');
+  });
+
+  it('без проблем секция не рендерится', () => {
+    const w = mount(PageDetails, { props: { page }, global: { plugins: [i18n] } });
+    expect(w.find('[data-test="page-issues"]').exists()).toBe(false);
+  });
+});

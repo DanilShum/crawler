@@ -1,5 +1,5 @@
 // apps/web/src/api/client.ts
-import type { CrawlOptions, Issue, PageResult } from '@seo-crawler/shared';
+import type { CrawlOptions, Issue, PageWithIssues } from '@seo-crawler/shared';
 
 export interface SessionMeta {
   id: string;
@@ -54,7 +54,7 @@ export interface FetchPagesParams {
 export function fetchPages(
   id: string,
   params: FetchPagesParams,
-): Promise<{ total: number; items: PageResult[] }> {
+): Promise<{ total: number; items: PageWithIssues[] }> {
   const qs = new URLSearchParams();
   qs.set('offset', String(params.offset));
   qs.set('limit', String(params.limit));

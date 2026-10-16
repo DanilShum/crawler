@@ -345,3 +345,33 @@ describe('pagesInIssueGroup: новые kind', () => {
     expect(set).toEqual(new Set(['http://a/1']));
   });
 });
+
+describe('GET /pages: обогащение issues', () => {
+  it('каждый item содержит список проблем своей страницы', async () => {
+    const site = await startTestSite();
+    try {
+      const { app, sessions } = newApp();
+      const start = await app.inject({
+        method: 'POST',
+        url: '/api/crawl',
+        payload: { startUrl: site.origin + '/', ...BASE },
+        headers: { 'content-type': 'application/json' },
+      });
+      const { id } = start.json();
+      await waitDone(sessions, id);
+
+      const res = await app.inject({ method: 'GET', url: `/api/crawl/${id}/pages` });
+      expect(res.statusCode).toBe(200);
+      const body = res.json();
+      const home = body.items.find((p: { url: string }) => p.url === site.origin + '/');
+      // главная фикстуры: битая внешняя ссылка (external.example), нет h1, нет og/favicon/lang
+      expect(home.issues).toEqual([
+        'broken-link', 'missing-h1', 'missing-og', 'missing-favicon', 'missing-lang',
+      ]);
+      const noindex = body.items.find((p: { url: string }) => p.url.endsWith('/noindex'));
+      expect(noindex.issues).toContain('noindex');
+    } finally {
+      await site.close();
+    }
+  });
+});

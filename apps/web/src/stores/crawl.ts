@@ -1,7 +1,7 @@
 // apps/web/src/stores/crawl.ts
 import { ref } from 'vue';
 import { defineStore } from 'pinia';
-import type { CrawlEvent, CrawlState, Issue, PageResult } from '@seo-crawler/shared';
+import type { CrawlEvent, CrawlState, Issue, PageWithIssues } from '@seo-crawler/shared';
 
 import { fetchIssues, fetchPages } from '../api/client';
 
@@ -24,7 +24,7 @@ export const useCrawlSession = defineStore('crawl-session', () => {
   const id = ref<string | null>(null);
   const progress = ref<CrawlProgress>(emptyProgress());
   const issues = ref<Issue[]>([]);
-  const pages = ref<PageResult[]>([]);
+  const pages = ref<PageWithIssues[]>([]);
   const total = ref(0);
   const tab = ref<CrawlTab>('internal');
   const issueFilter = ref<string | null>(null);

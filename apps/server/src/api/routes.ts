@@ -4,7 +4,7 @@ import { TooManySessionsError } from '../session/session-manager';
 import type { SessionManager } from '../session/session-manager';
 import { toCsv } from '../export/csv';
 import { isHeadingOrderBroken } from '../crawler/issues';
-import type { CrawlOptions, IssueKind, PageResult } from '@seo-crawler/shared';
+import type { CrawlOptions, IssueKind, PageResult, PageWithIssues } from '@seo-crawler/shared';
 
 const MODES = ['spider', 'list', 'sitemap'] as const;
 const TABS = ['internal', 'external', 'images'] as const;
@@ -239,8 +239,19 @@ export function buildApp(deps: { sessions: SessionManager }): FastifyInstance {
     }
     items.sort((a, b) => a.depth - b.depth || a.url.localeCompare(b.url));
 
+    // Проблемы каждой страницы считает сервер: для broken-link нужны linkStatuses,
+    // для дублей — весь датасет; фронтенду они недоступны.
+    const results = [...session.results.values()];
+    const groupSets = new Map<IssueKind, Set<string>>(
+      ISSUE_KINDS.map((k) => [k, pagesInIssueGroup(results, session.linkStatuses, k)]),
+    );
+    const withIssues = (p: PageResult): PageWithIssues => ({
+      ...p,
+      issues: ISSUE_KINDS.filter((k) => groupSets.get(k)!.has(p.url)),
+    });
+
     const total = items.length;
-    const pageItems = items.slice(offset, offset + limit);
+    const pageItems = items.slice(offset, offset + limit).map(withIssues);
     return reply.code(200).send({ total, items: pageItems });
   });
 

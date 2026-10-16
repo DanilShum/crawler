@@ -1,7 +1,9 @@
 // apps/web/src/components/PageDetails.tsx
 import { computed, defineComponent, type PropType } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { type HeadingLevel, type LinkInfo, type PageResult } from '@seo-crawler/shared';
+import { type HeadingLevel, type IssueKind, type LinkInfo, type PageResult } from '@seo-crawler/shared';
+
+import { ISSUE_LABELS } from '../issue-labels';
 
 const HEADING_LEVELS: HeadingLevel[] = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
 
@@ -39,6 +41,11 @@ export default defineComponent({
     page: {
       type: Object as PropType<PageResult>,
       required: true,
+    },
+    issues: {
+      type: Array as PropType<IssueKind[]>,
+      required: false,
+      default: () => [],
     },
     onClose: {
       type: Function as PropType<() => void>,
@@ -87,6 +94,16 @@ export default defineComponent({
               </span>
             ) : null}
           </div>
+
+          {props.issues.length > 0 ? (
+            <div class="pd-section pd-issues" data-test="page-issues">
+              {props.issues.map((kind) => (
+                <span key={kind} class="badge badge-warn" data-test="page-issue">
+                  {t(ISSUE_LABELS[kind])}
+                </span>
+              ))}
+            </div>
+          ) : null}
 
           {props.page.error !== null ? (
             <div class="pd-section">

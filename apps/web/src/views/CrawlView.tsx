@@ -2,33 +2,20 @@
 import { computed, defineComponent, onMounted, onUnmounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import type { Issue, IssueKind } from '@seo-crawler/shared';
+import type { Issue } from '@seo-crawler/shared';
 
 import ProgressDashboard from '../components/ProgressDashboard';
 import ResultsTable from '../components/ResultsTable';
 import PageDetails from '../components/PageDetails';
 import { useCrawlSession, type CrawlTab } from '../stores/crawl';
 import { exportUrl, stopCrawl } from '../api/client';
+import { ISSUE_LABELS } from '../issue-labels';
 
 const TABS: Array<{ tab: CrawlTab; labelKey: string }> = [
   { tab: 'internal', labelKey: 'tabs.internal' },
   { tab: 'external', labelKey: 'tabs.external' },
   { tab: 'images', labelKey: 'tabs.images' },
 ];
-
-const ISSUE_LABELS: Record<IssueKind, string> = {
-  'broken-link': 'issues.brokenLink',
-  'duplicate-title': 'issues.duplicateTitle',
-  'duplicate-description': 'issues.duplicateDescription',
-  'duplicate-h1': 'issues.duplicateH1',
-  'missing-h1': 'issues.missingH1',
-  'missing-alt': 'issues.missingAlt',
-  noindex: 'issues.noindex',
-  'missing-og': 'issues.missingOg',
-  'missing-favicon': 'issues.missingFavicon',
-  'missing-lang': 'issues.missingLang',
-  'heading-order': 'issues.headingOrder',
-};
 
 export default defineComponent({
   name: 'CrawlView',
@@ -135,6 +122,7 @@ export default defineComponent({
           {selectedPage.value ? (
             <PageDetails
               page={selectedPage.value}
+              issues={selectedPage.value.issues}
               onClose={() => {
                 store.selectedUrl = null;
               }}
