@@ -203,3 +203,36 @@ describe('CrawlView', () => {
     expect(wrapper.find('[data-test="page-details"]').exists()).toBe(false);
   });
 });
+
+describe('CrawlView: баннер api-error', () => {
+  beforeEach(() => {
+    FakeWebSocket.instances = [];
+    fetchMock = vi.fn(async (input: RequestInfo | URL): Promise<Response> => {
+      const url = String(input);
+      if (url.startsWith('/api/crawl/s1/pages')) return jsonResponse({ total: 2, items: [pageA, pageB] });
+      if (url.startsWith('/api/crawl/s1/issues')) return jsonResponse([brokenLink, noindexIssue]);
+      throw new Error(`unexpected fetch: ${url}`);
+    });
+    vi.stubGlobal('fetch', fetchMock as unknown as typeof fetch);
+    vi.stubGlobal('WebSocket', FakeWebSocket as unknown as typeof WebSocket);
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    wrapper?.unmount();
+  });
+
+  it('не рендерится при пустом apiError', async () => {
+    await mountView();
+    expect(store.apiError).toBeNull();
+    expect(wrapper.find('[data-test="api-error"]').exists()).toBe(false);
+  });
+
+  it('рендерится с сообщением при apiError', async () => {
+    await mountView();
+    store.apiError = 'HTTP 500';
+    await wrapper.vm.$nextTick();
+    expect(wrapper.find('[data-test="api-error"]').exists()).toBe(true);
+    expect(wrapper.find('[data-test="api-error"]').text()).toBe('HTTP 500');
+  });
+});
