@@ -4,18 +4,12 @@ import { useI18n } from 'vue-i18n';
 import type { PageResult } from '@seo-crawler/shared';
 
 import { useCrawlSession } from '../stores/crawl';
+import { statusClass } from '../helpers';
 
 const PAGE_LIMIT = 50;
 
 type SortKey = 'url' | 'status' | 'title' | 'h1' | 'noindex' | 'depth' | 'contentType';
 type SortDir = 'asc' | 'desc';
-
-function statusClass(page: PageResult): string {
-  if (page.status === null) return 'badge-error';
-  if (page.status < 300) return 'badge-ok';
-  if (page.status < 400) return 'badge-redirect';
-  return 'badge-error';
-}
 
 function sortValue(page: PageResult, key: SortKey): string | number {
   switch (key) {

@@ -7,15 +7,10 @@ import type { Issue } from '@seo-crawler/shared';
 import ProgressDashboard from '../components/ProgressDashboard';
 import ResultsTable from '../components/ResultsTable';
 import PageDetails from '../components/PageDetails';
-import { useCrawlSession, type CrawlTab } from '../stores/crawl';
+import { useCrawlSession } from '../stores/crawl';
+import { TABS } from '../constants';
 import { exportUrl, stopCrawl } from '../api/client';
-import { ISSUE_LABELS } from '../issue-labels';
-
-const TABS: Array<{ tab: CrawlTab; labelKey: string }> = [
-  { tab: 'internal', labelKey: 'tabs.internal' },
-  { tab: 'external', labelKey: 'tabs.external' },
-  { tab: 'images', labelKey: 'tabs.images' },
-];
+import { ISSUE_LABELS } from '../constants';
 
 export default defineComponent({
   name: 'CrawlView',

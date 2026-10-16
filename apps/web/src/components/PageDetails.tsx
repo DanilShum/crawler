@@ -1,26 +1,14 @@
 // apps/web/src/components/PageDetails.tsx
 import { computed, defineComponent, type PropType } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { statusClass, formatBytes } from '../helpers';
 import { type HeadingLevel, type IssueKind, type LinkInfo, type PageResult } from '@seo-crawler/shared';
 
-import { ISSUE_LABELS } from '../issue-labels';
+import { ISSUE_LABELS } from '../constants';
 
 type BrokenLink = { url: string; status: number | null };
 
 const HEADING_LEVELS: HeadingLevel[] = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
-
-function statusClass(page: PageResult): string {
-  if (page.status === null) return 'badge-error';
-  if (page.status < 300) return 'badge-ok';
-  if (page.status < 400) return 'badge-redirect';
-  return 'badge-error';
-}
-
-function formatBytes(n: number): string {
-  if (n < 1024) return `${n} B`;
-  if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
-  return `${(n / (1024 * 1024)).toFixed(1)} MB`;
-}
 
 function renderLinks(links: LinkInfo[], broken: BrokenLink[], t: (k: string) => string) {
   if (links.length === 0) return <p class="pd-muted">—</p>;
