@@ -7,7 +7,8 @@ const BOM = '\uFEFF';
 const HEADER =
   'url,status,error,depth,title,description,meta_robots,canonical,' +
   'content_type,size_bytes,response_time_ms,noindex,nofollow,rendered,' +
-  'h1_count,images_without_alt,internal_links,external_links';
+  'h1_count,images_without_alt,internal_links,external_links,' +
+  'og_title,og_description,og_image,twitter_card,hreflang,favicon,word_count,lang';
 
 function page(over: Partial<PageResult> & { url: string }): PageResult {
   return {
@@ -52,8 +53,8 @@ describe('toCsv', () => {
     const b = page({ url: 'https://a.test/about', depth: 1, status: 404, noindex: true });
     const expected =
       BOM + HEADER + '\n' +
-      'https://a.test/,200,,0,Home,,,,text/html,100,10,false,false,false,0,0,0,0\n' +
-      'https://a.test/about,404,,1,,,,,text/html,100,10,true,false,false,0,0,0,0';
+      'https://a.test/,200,,0,Home,,,,text/html,100,10,false,false,false,0,0,0,0,,,,,,,0,\n' +
+      'https://a.test/about,404,,1,,,,,text/html,100,10,true,false,false,0,0,0,0,,,,,,,0,';
     expect(toCsv([a, b])).toBe(expected);
   });
 
@@ -66,7 +67,7 @@ describe('toCsv', () => {
     const body = toCsv([p]).slice(BOM.length);
     const dataLine = body.split('\n')[1];
     expect(dataLine).toBe(
-      'https://a.test/,200,,0,"He said, ""hi""","a, b",,,text/html,100,10,false,false,false,0,0,0,0',
+      'https://a.test/,200,,0,"He said, ""hi""","a, b",,,text/html,100,10,false,false,false,0,0,0,0,,,,,,,0,',
     );
   });
 
@@ -87,7 +88,7 @@ describe('toCsv', () => {
     });
     const dataLine = toCsv([p]).split('\n')[1];
     // status пустой, error = timeout, content_type пустой
-    expect(dataLine).toBe('https://a.test/,,timeout,0,,,,,,100,10,false,false,false,0,0,0,0');
+    expect(dataLine).toBe('https://a.test/,,timeout,0,,,,,,100,10,false,false,false,0,0,0,0,,,,,,,0,');
   });
 
   it('защищает текстовые поля от formula injection (префикс апострофа)', () => {
@@ -103,7 +104,7 @@ describe('toCsv', () => {
     // =,+,-,@ в начале текстовых полей получают префикс '; числовые/boolean не трогаются,
     // url (начинается с http) не пострадал. Кавычка внутри title экранируется по RFC 4180.
     expect(dataLine).toBe(
-      'https://a.test/,200,,0,"\'=HYPERLINK(""x"")",\'-sum,\'@noindex,\'=CMD,text/html,100,10,false,false,false,0,0,0,0',
+      'https://a.test/,200,,0,"\'=HYPERLINK(""x"")",\'-sum,\'@noindex,\'=CMD,text/html,100,10,false,false,false,0,0,0,0,,,,,,,0,',
     );
   });
 
@@ -127,7 +128,44 @@ describe('toCsv', () => {
     });
     const dataLine = toCsv([p]).split('\n')[1];
     expect(dataLine).toBe(
-      'https://a.test/,200,,0,,,,,text/html,100,10,true,true,true,2,2,1,2',
+      'https://a.test/,200,,0,,,,,text/html,100,10,true,true,true,2,2,1,2,,,,,,,0,',
     );
+  });
+});
+
+describe('обогащённые колонки', () => {
+  it('добавляет og/twitter/hreflang/favicon/word_count/lang после существующих', () => {
+    const rows = toCsv([
+      page({
+        url: 'https://s.test/',
+        openGraph: { title: 'OG Title', description: 'OG Desc', image: 'https://s.test/og.png', url: 'https://s.test/' },
+        twitter: { card: 'summary_large_image', title: null, description: null, image: null },
+        hreflang: [{ lang: 'en', href: 'https://s.test/en/' }, { lang: 'x-default', href: 'https://s.test/' }],
+        favicon: '/favicon.ico',
+        wordCount: 322,
+        lang: 'ru',
+      }),
+    ]).split('\n');
+    expect(rows[0].split(',').slice(-8)).toEqual(
+      ['og_title', 'og_description', 'og_image', 'twitter_card', 'hreflang', 'favicon', 'word_count', 'lang'],
+    );
+    // split(',') не годится для кавычченных ячеек — сравниваем хвост строки;
+    // hreflang-строка с ';' внутри не кавыччится (кавычки нужны только для , " \n)
+    expect(rows[1].endsWith(',OG Title,OG Desc,https://s.test/og.png,summary_large_image,en=https://s.test/en/; x-default=https://s.test/,/favicon.ico,322,ru')).toBe(true);
+  });
+
+  it('null-объекты и пустые поля — пустые ячейки', () => {
+    const rows = toCsv([page({ url: 'https://s.test/', wordCount: 322 })]).split('\n');
+    // 6 пустых ячеек (og/twitter/hreflang/favicon), word_count=322, пустой lang
+    expect(rows[1].endsWith(',,,,,,322,')).toBe(true);
+  });
+
+  it('og:description с формульным началом и запятой экранируется', () => {
+    const rows = toCsv([{
+      ...page({ url: 'https://s.test/' }),
+      openGraph: { title: null, description: '=СУММ(A1;2)', image: null, url: null },
+    }]).split('\n');
+    // запятых в значении нет — кавычек не будет, апостроф гасит формулу
+    expect(rows[1]).toContain(`'=СУММ(A1;2)`);
   });
 });

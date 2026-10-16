@@ -6,7 +6,8 @@ const BOM = '\uFEFF';
 const HEADER =
   'url,status,error,depth,title,description,meta_robots,canonical,' +
   'content_type,size_bytes,response_time_ms,noindex,nofollow,rendered,' +
-  'h1_count,images_without_alt,internal_links,external_links';
+  'h1_count,images_without_alt,internal_links,external_links,' +
+  'og_title,og_description,og_image,twitter_card,hreflang,favicon,word_count,lang';
 
 // Текстовые колонки, значения которых может подставить сайт: их защищаем от
 // CSV-формульной инъекции (=, +, - или @ в начале → префикс апострофа).
@@ -19,6 +20,13 @@ const TEXT_FIELDS = new Set([
   'metaRobots',
   'canonical',
   'contentType',
+  'ogTitle',
+  'ogDescription',
+  'ogImage',
+  'twitterCard',
+  'hreflang',
+  'favicon',
+  'lang',
 ]);
 
 /**
@@ -57,6 +65,14 @@ function toRow(p: PageResult): string {
     escapeField(p.images.filter((i) => i.alt === null).length),
     escapeField(p.internalLinks.length),
     escapeField(p.externalLinks.length),
+    escapeField(p.openGraph?.title ?? null, true),
+    escapeField(p.openGraph?.description ?? null, true),
+    escapeField(p.openGraph?.image ?? null, true),
+    escapeField(p.twitter?.card ?? null, true),
+    escapeField(p.hreflang.map((h) => `${h.lang}=${h.href}`).join('; ') || null, true),
+    escapeField(p.favicon, true),
+    escapeField(p.wordCount),
+    escapeField(p.lang, true),
   ].join(',');
 }
 
