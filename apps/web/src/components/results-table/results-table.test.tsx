@@ -1,4 +1,3 @@
-// apps/web/src/components/results-table.test.tsx
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { createPinia, setActivePinia } from 'pinia';

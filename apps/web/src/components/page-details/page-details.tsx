@@ -1,4 +1,3 @@
-// apps/web/src/components/page-details.tsx
 import { computed, defineComponent, type PropType } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { statusClass, formatBytes } from '../../helpers';

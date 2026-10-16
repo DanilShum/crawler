@@ -1,4 +1,3 @@
-// apps/web/src/views/new-crawl-view.tsx
 import { defineComponent, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';

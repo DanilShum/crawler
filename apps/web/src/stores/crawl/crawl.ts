@@ -1,4 +1,3 @@
-// apps/web/src/stores/crawl.ts
 import { ref } from 'vue';
 import { defineStore } from 'pinia';
 import type { CrawlEvent, CrawlState, Issue, PageWithIssues } from '@seo-crawler/shared';

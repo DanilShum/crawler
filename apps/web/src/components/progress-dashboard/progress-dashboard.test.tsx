@@ -1,4 +1,3 @@
-// apps/web/src/components/progress-dashboard.test.tsx
 import { describe, it, expect, vi } from 'vitest';
 import type { Mock } from 'vitest';
 import { mount } from '@vue/test-utils';

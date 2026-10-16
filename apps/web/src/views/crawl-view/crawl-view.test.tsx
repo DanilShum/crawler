@@ -1,4 +1,3 @@
-// apps/web/src/components/../views/crawl-view.test.tsx
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { mount, type VueWrapper } from '@vue/test-utils';
 import { createPinia, setActivePinia, type Pinia } from 'pinia';

@@ -87,13 +87,6 @@ export default defineComponent({
       void store.loadPages().catch(() => {});
     }
 
-    const header = (key: SortKey, labelKey: string) => (
-      <th data-test={`th-${key}`} onClick={() => toggleSort(key)}>
-        {t(labelKey)}
-        {mark(key)}
-      </th>
-    );
-
     // ячейка по конфигу колонки; статус и noindex — бейджи, остальные — текст
     const cell = (page: PageWithIssues, col: (typeof COLUMNS)[number]) => {
       const attrs = {

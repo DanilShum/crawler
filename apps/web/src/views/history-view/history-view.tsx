@@ -1,4 +1,3 @@
-// apps/web/src/views/history-view.tsx
 import { defineComponent, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';

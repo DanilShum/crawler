@@ -1,4 +1,3 @@
-// apps/web/src/components/page-details.test.tsx
 import { describe, expect, it, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { createI18n } from 'vue-i18n';
