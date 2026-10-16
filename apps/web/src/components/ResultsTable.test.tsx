@@ -35,6 +35,13 @@ function makePage(over: Partial<PageResult> = {}): PageResult {
     noindex: false,
     nofollow: false,
     redirectChain: [],
+  openGraph: null,
+  twitter: null,
+  hreflang: [],
+  favicon: null,
+  wordCount: 0,
+  lang: null,
+  headingOrder: [],
   };
   return { ...base, ...over };
 }

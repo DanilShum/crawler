@@ -24,6 +24,10 @@ const ISSUE_LABELS: Record<IssueKind, string> = {
   'missing-h1': 'issues.missingH1',
   'missing-alt': 'issues.missingAlt',
   noindex: 'issues.noindex',
+  'missing-og': 'issues.missingOg',
+  'missing-favicon': 'issues.missingFavicon',
+  'missing-lang': 'issues.missingLang',
+  'heading-order': 'issues.headingOrder',
 };
 
 export default defineComponent({

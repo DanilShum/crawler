@@ -16,6 +16,10 @@ export interface LinkInfo { url: string; anchor: string | null; rel: string | nu
 export interface ImageInfo { url: string; alt: string | null; }
 export type HeadingLevel = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
 
+export interface OpenGraphInfo { title: string | null; description: string | null; image: string | null; url: string | null; }
+export interface TwitterInfo { card: string | null; title: string | null; description: string | null; image: string | null; }
+export interface HreflangInfo { lang: string; href: string; }
+
 export interface PageResult {
   url: string;
   status: number | null;            // null при сетевой ошибке
@@ -38,13 +42,21 @@ export interface PageResult {
   noindex: boolean;
   nofollow: boolean;
   redirectChain: string[];          // промежуточные URL
+  openGraph: OpenGraphInfo | null;  // null если нет ни одного og:* тега
+  twitter: TwitterInfo | null;      // null если нет ни одного twitter:* тега
+  hreflang: HreflangInfo[];
+  favicon: string | null;
+  wordCount: number;                // слова видимого текста body
+  lang: string | null;              // <html lang>
+  headingOrder: HeadingLevel[];     // уровни заголовков в порядке документа
 }
 
 export type CrawlState = 'running' | 'done' | 'stopped';
 
 export type IssueKind =
   | 'broken-link' | 'duplicate-title' | 'duplicate-description'
-  | 'duplicate-h1' | 'missing-h1' | 'missing-alt' | 'noindex';
+  | 'duplicate-h1' | 'missing-h1' | 'missing-alt' | 'noindex'
+  | 'missing-og' | 'missing-favicon' | 'missing-lang' | 'heading-order';
 
 export interface Issue {
   kind: IssueKind;

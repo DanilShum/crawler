@@ -42,6 +42,13 @@ const page: PageResult = {
   noindex: true,
   nofollow: true,
   redirectChain: [],
+  openGraph: null,
+  twitter: null,
+  hreflang: [],
+  favicon: null,
+  wordCount: 0,
+  lang: null,
+  headingOrder: [],
 };
 
 function mountDetails(getPage: PageResult = page) {

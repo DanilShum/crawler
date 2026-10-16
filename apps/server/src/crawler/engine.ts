@@ -268,6 +268,13 @@ export class Crawler {
       noindex: false,
       nofollow: false,
       redirectChain: o.redirectChain,
+      openGraph: null,
+      twitter: null,
+      hreflang: [],
+      favicon: null,
+      wordCount: 0,
+      lang: null,
+      headingOrder: [],
     };
   }
 

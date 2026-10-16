@@ -64,6 +64,13 @@ function makePage(url: string): PageResult {
     noindex: false,
     nofollow: false,
     redirectChain: [],
+  openGraph: null,
+  twitter: null,
+  hreflang: [],
+  favicon: null,
+  wordCount: 0,
+  lang: null,
+  headingOrder: [],
   };
 }
 
