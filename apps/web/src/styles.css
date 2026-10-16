@@ -488,8 +488,14 @@ pre,
   padding: 7px 10px;
 }
 
+/* таблица не сжимается ниже 1000px — на узких экранах скроллит контейнер */
+.table-scroll {
+  overflow-x: auto;
+}
+
 .results-table {
   width: 100%;
+  min-width: 1000px;
   border-collapse: collapse;
   font-size: 14px;
 }

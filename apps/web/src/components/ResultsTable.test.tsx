@@ -192,3 +192,12 @@ describe('ResultsTable: колонка слов', () => {
     expect(wrapper.find('[data-test="cell-wordcount"]').text()).toBe('322');
   });
 });
+
+describe('ResultsTable: горизонтальный скролл', () => {
+  it('таблица обёрнута в скролл-контейнер', () => {
+    const { wrapper } = mountTable([makePage()]);
+    const scroll = wrapper.find('[data-test="table-scroll"]');
+    expect(scroll.exists()).toBe(true);
+    expect(scroll.find('table.results-table').exists()).toBe(true);
+  });
+});

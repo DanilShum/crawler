@@ -118,63 +118,65 @@ export default defineComponent({
           </span>
         </div>
 
-        <table class="results-table">
-          <thead>
-            <tr>
-              {header('url', 'table.url')}
-              {header('status', 'table.status')}
-              {header('title', 'table.title')}
-              {header('h1', 'table.h1')}
-              {header('noindex', 'table.indexability')}
-              {header('depth', 'table.depth')}
-              {header('contentType', 'table.contentType')}
-              <th data-test="th-wordCount">{t('table.wordCount')}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.value.length === 0 ? (
+        <div class="table-scroll" data-test="table-scroll">
+          <table class="results-table">
+            <thead>
               <tr>
-                <td class="table-empty" colspan={7}>
-                  {t('table.empty')}
-                </td>
+                {header('url', 'table.url')}
+                {header('status', 'table.status')}
+                {header('title', 'table.title')}
+                {header('h1', 'table.h1')}
+                {header('noindex', 'table.indexability')}
+                {header('depth', 'table.depth')}
+                {header('contentType', 'table.contentType')}
+                <th data-test="th-wordCount">{t('table.wordCount')}</th>
               </tr>
-            ) : (
-              rows.value.map((page) => (
-                <tr
-                  key={page.url}
-                  data-test="row"
-                  class="table-row"
-                  onClick={() => {
-                    store.selectedUrl = page.url;
-                  }}
-                >
-                  <td class="url-cell" data-test="cell-url">
-                    {page.url}
+            </thead>
+            <tbody>
+              {rows.value.length === 0 ? (
+                <tr>
+                  <td class="table-empty" colspan={7}>
+                    {t('table.empty')}
                   </td>
-                  <td>
-                    <span class={`badge ${statusClass(page)}`} data-test="status-badge">
-                      {page.status !== null ? String(page.status) : (page.error ?? t('table.error'))}
-                    </span>
-                  </td>
-                  <td data-test="cell-title">{page.title ?? '—'}</td>
-                  <td data-test="cell-h1">{page.headings.h1[0] ?? '—'}</td>
-                  <td>
-                    {page.noindex ? (
-                      <span class="badge badge-error" data-test="badge-noindex">
-                        {t('table.noindex')}
-                      </span>
-                    ) : null}
-                  </td>
-                  <td data-test="cell-depth">{page.depth}</td>
-                  <td class="type-cell" data-test="cell-content-type">
-                    {page.contentType ?? '—'}
-                  </td>
-                  <td data-test="cell-wordcount">{page.wordCount}</td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+              ) : (
+                rows.value.map((page) => (
+                  <tr
+                    key={page.url}
+                    data-test="row"
+                    class="table-row"
+                    onClick={() => {
+                      store.selectedUrl = page.url;
+                    }}
+                  >
+                    <td class="url-cell" data-test="cell-url">
+                      {page.url}
+                    </td>
+                    <td>
+                      <span class={`badge ${statusClass(page)}`} data-test="status-badge">
+                        {page.status !== null ? String(page.status) : (page.error ?? t('table.error'))}
+                      </span>
+                    </td>
+                    <td data-test="cell-title">{page.title ?? '—'}</td>
+                    <td data-test="cell-h1">{page.headings.h1[0] ?? '—'}</td>
+                    <td>
+                      {page.noindex ? (
+                        <span class="badge badge-error" data-test="badge-noindex">
+                          {t('table.noindex')}
+                        </span>
+                      ) : null}
+                    </td>
+                    <td data-test="cell-depth">{page.depth}</td>
+                    <td class="type-cell" data-test="cell-content-type">
+                      {page.contentType ?? '—'}
+                    </td>
+                    <td data-test="cell-wordcount">{page.wordCount}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
 
         <div class="table-pagination">
           <button
