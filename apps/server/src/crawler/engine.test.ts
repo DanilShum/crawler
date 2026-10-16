@@ -91,6 +91,17 @@ describe('Crawler spider', () => {
     } finally { await site.close(); }
   });
 
+  it('закрытый порт детерминированно даёт страницу со status=null и error=connection', async () => {
+    // Self-Review плана: URL на закрытый порт локального тест-сервера → status: null
+    const site = await startTestSite();
+    const origin = site.origin;
+    await site.close();
+    const { pages } = await run(origin, opts(origin, { maxUrls: 1 }));
+    expect(pages.length).toBe(1);
+    expect(pages[0].status).toBeNull();
+    expect(pages[0].error).toBe('connection');
+  });
+
   it('respectRobots=false обходит запрещённые пути', async () => {
     const site = await startTestSite();
     try {
