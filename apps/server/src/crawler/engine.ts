@@ -4,8 +4,8 @@ import { fetchRobots } from './robots';
 import type { RobotsInfo } from './robots';
 import { fetchSitemapUrls } from './sitemap';
 import type { CrawlOptions, PageResult, HeadingLevel } from '@seo-crawler/shared';
-import { createFetcher } from './rendered-fetcher';
-import type { Fetcher, FetchOutcome } from './fetcher';
+import { createFetcher } from './fetch/rendered-fetcher';
+import type { Fetcher, FetchOutcome } from './fetch/fetcher';
 
 export type EngineEvent =
   | { type: 'page'; result: PageResult }

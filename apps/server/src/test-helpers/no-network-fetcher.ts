@@ -1,6 +1,6 @@
-import { createFetcher } from '../crawler/rendered-fetcher';
-import { HttpFetcher } from '../crawler/fetcher';
-import type { Fetcher, FetchOutcome } from '../crawler/fetcher';
+import { createFetcher } from '../crawler/fetch/rendered-fetcher';
+import { HttpFetcher } from '../crawler/fetch/fetcher';
+import type { Fetcher, FetchOutcome } from '../crawler/fetch/fetcher';
 
 const LOCAL_HOSTNAMES = new Set(['127.0.0.1', 'localhost', '::1']);
 

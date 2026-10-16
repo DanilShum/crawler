@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import { describe, it, expect, afterAll, beforeAll } from 'vitest';
 import { createServer, type Server, type IncomingMessage, type ServerResponse } from 'node:http';
 import { createServer as createHttpsServer, type Server as HttpsServer } from 'node:https';
-import { startTestSite } from '../test-helpers/test-site';
+import { startTestSite } from '../../test-helpers/test-site';
 import { HttpFetcher } from './fetcher';
 
 // Минимальный HTTP-прокси: принимает absolute-form GET и пересылает на цель

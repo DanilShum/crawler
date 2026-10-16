@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { startTestSite } from '../test-helpers/test-site';
 import { NoNetworkFetcher } from '../test-helpers/no-network-fetcher';
 import { Crawler } from './engine';
-import type { Fetcher } from './fetcher';
+import type { Fetcher } from './fetch/fetcher';
 import type { CrawlOptions, PageResult } from '@seo-crawler/shared';
 
 function opts(origin: string, over: Partial<CrawlOptions> = {}): CrawlOptions {

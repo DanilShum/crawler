@@ -1,8 +1,8 @@
 import { randomUUID } from 'node:crypto';
 import { Crawler } from '../crawler/engine';
-import { createFetcher } from '../crawler/rendered-fetcher';
+import { createFetcher } from '../crawler/fetch/rendered-fetcher';
 import { computeIssues } from '../crawler/issues';
-import type { Fetcher } from '../crawler/fetcher';
+import type { Fetcher } from '../crawler/fetch/fetcher';
 import type { CrawlOptions, PageResult, CrawlEvent, CrawlState, Issue } from '@seo-crawler/shared';
 
 export class TooManySessionsError extends Error {

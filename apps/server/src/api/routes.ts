@@ -4,10 +4,10 @@ import { TooManySessionsError } from '../session/session-manager';
 import type { SessionManager } from '../session/session-manager';
 import { toCsv } from '../export/csv';
 import { isHeadingOrderBroken } from '../crawler/issues';
+import { NUMERIC_FIELDS, TABS, type NumericField } from './constants';
 import type { CrawlOptions, IssueKind, PageResult, PageWithIssues } from '@seo-crawler/shared';
 
 const MODES = ['spider', 'list', 'sitemap'] as const;
-const TABS = ['internal', 'external', 'images'] as const;
 const ISSUE_KINDS: IssueKind[] = [
   'broken-link', 'duplicate-title', 'duplicate-description',
   'duplicate-h1', 'missing-h1', 'missing-alt', 'noindex',
@@ -56,18 +56,16 @@ function parseCrawlOptions(input: unknown): Parsed<CrawlOptions> {
     return v >= min && v <= max ? v : null;
   };
 
-  const maxUrls = inRange(b.maxUrls, 1, 10000);
-  if (maxUrls === null) return { ok: false, message: 'maxUrls должен быть целым числом от 1 до 10000' };
-
-  const maxDepth = inRange(b.maxDepth, 0, 20);
-  if (maxDepth === null) return { ok: false, message: 'maxDepth должен быть целым числом от 0 до 20' };
-
-  const concurrency = inRange(b.concurrency, 1, 20);
-  if (concurrency === null) return { ok: false, message: 'concurrency должен быть целым числом от 1 до 20' };
-
-  const requestTimeoutMs = inRange(b.requestTimeoutMs, 1000, 120000);
-  if (requestTimeoutMs === null) {
-    return { ok: false, message: 'requestTimeoutMs должен быть целым числом от 1000 до 120000' };
+  // числовые поля — по декларативному конфигу границ
+  const numeric: Record<NumericField['name'], number> = {
+    maxUrls: 0, maxDepth: 0, concurrency: 0, requestTimeoutMs: 0,
+  };
+  for (const f of NUMERIC_FIELDS) {
+    const v = inRange(b[f.name], f.min, f.max);
+    if (v === null) {
+      return { ok: false, message: `${f.name} должен быть целым числом от ${f.min} до ${f.max}` };
+    }
+    numeric[f.name] = v;
   }
 
   if (!isBool(b.respectRobots)) return { ok: false, message: 'respectRobots должен быть boolean' };
@@ -79,10 +77,10 @@ function parseCrawlOptions(input: unknown): Parsed<CrawlOptions> {
       startUrl: b.startUrl,
       mode: mode as CrawlOptions['mode'],
       ...(mode === 'list' ? { listUrls: b.listUrls as string[] } : {}),
-      maxUrls,
-      maxDepth,
-      concurrency,
-      requestTimeoutMs,
+      maxUrls: numeric.maxUrls,
+      maxDepth: numeric.maxDepth,
+      concurrency: numeric.concurrency,
+      requestTimeoutMs: numeric.requestTimeoutMs,
       respectRobots: b.respectRobots,
       renderJs: b.renderJs,
     },

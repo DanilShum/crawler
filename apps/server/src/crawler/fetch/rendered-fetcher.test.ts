@@ -1,8 +1,8 @@
 import { existsSync } from 'node:fs';
 import { beforeAll, afterAll, describe, it, expect } from 'vitest';
 import { chromium } from 'playwright';
-import { startTestSite } from '../test-helpers/test-site';
-import type { TestSite } from '../test-helpers/test-site';
+import { startTestSite } from '../../test-helpers/test-site';
+import type { TestSite } from '../../test-helpers/test-site';
 import { HttpFetcher } from './fetcher';
 import { RenderedFetcher, createFetcher } from './rendered-fetcher';
 
