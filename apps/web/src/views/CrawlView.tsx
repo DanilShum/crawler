@@ -67,6 +67,10 @@ export default defineComponent({
       <main class="view crawl-view">
         <ProgressDashboard onStop={handleStop} />
 
+        {store.apiError !== null ? (
+          <div class="api-error" data-test="api-error">{store.apiError}</div>
+        ) : null}
+
         {store.id ? (
           <div class="crawl-toolbar">
             <a

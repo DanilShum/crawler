@@ -30,6 +30,7 @@ export const useCrawlSession = defineStore('crawl-session', () => {
   const issueFilter = ref<string | null>(null);
   const selectedUrl = ref<string | null>(null);
   const pageOffset = ref(0);
+  const apiError = ref<string | null>(null);
 
   let ws: WebSocket | null = null;
   let reconnectAttempts = 0;
@@ -100,19 +101,32 @@ export const useCrawlSession = defineStore('crawl-session', () => {
 
   async function loadPages(offset = pageOffset.value): Promise<void> {
     if (!id.value) return;
-    const data = await fetchPages(id.value, {
-      offset,
-      limit: PAGE_LIMIT,
-      tab: tab.value,
-      issue: issueFilter.value ?? undefined,
-    });
-    pages.value = data.items;
-    total.value = data.total;
+    try {
+      const data = await fetchPages(id.value, {
+        offset,
+        limit: PAGE_LIMIT,
+        tab: tab.value,
+        issue: issueFilter.value ?? undefined,
+      });
+      pages.value = data.items;
+      total.value = data.total;
+      apiError.value = null;
+    } catch (e) {
+      // ошибка не глотается молча: баннер в UI объясняет, почему список не обновился
+      apiError.value = e instanceof Error ? e.message : String(e);
+      throw e;
+    }
   }
 
   async function loadIssues(): Promise<void> {
     if (!id.value) return;
-    issues.value = await fetchIssues(id.value);
+    try {
+      issues.value = await fetchIssues(id.value);
+      apiError.value = null;
+    } catch (e) {
+      apiError.value = e instanceof Error ? e.message : String(e);
+      throw e;
+    }
   }
 
   function closeWs(): void {
@@ -144,6 +158,7 @@ export const useCrawlSession = defineStore('crawl-session', () => {
     issueFilter.value = null;
     selectedUrl.value = null;
     pageOffset.value = 0;
+    apiError.value = null;
     connect();
     // REST-база, чтобы UI не ждал WS
     void loadPages().catch(() => {});
@@ -176,6 +191,7 @@ export const useCrawlSession = defineStore('crawl-session', () => {
     issueFilter,
     selectedUrl,
     pageOffset,
+    apiError,
     open,
     close,
     loadPages,

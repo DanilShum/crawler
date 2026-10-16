@@ -217,3 +217,45 @@ describe('useCrawlSession', () => {
     expect(store.pageOffset).toBe(0);
   });
 });
+
+describe('useCrawlSession: apiError', () => {
+  beforeEach(() => {
+    setActivePinia(createPinia());
+    FakeWebSocket.instances = [];
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('неудача loadPages выставляет apiError, успех сбрасывает', async () => {
+    const store = useCrawlSession();
+    store.id = 's1';
+    fetchMock = vi.fn(async () => new Response('boom', { status: 500 }));
+    vi.stubGlobal('fetch', fetchMock as unknown as typeof fetch);
+
+    await store.loadPages().catch(() => {});
+    expect(store.apiError).not.toBeNull();
+
+    fetchMock = makeFetchMock();
+    vi.stubGlobal('fetch', fetchMock as unknown as typeof fetch);
+    await store.loadPages().catch(() => {});
+    expect(store.apiError).toBeNull();
+  });
+
+  it('open() сбрасывает apiError и не даёт его повиснуть с прошлой сессии', async () => {
+    const store = useCrawlSession();
+    store.id = 's1';
+    fetchMock = vi.fn(async () => new Response('boom', { status: 500 }));
+    vi.stubGlobal('fetch', fetchMock as unknown as typeof fetch);
+    await store.loadPages().catch(() => {});
+    expect(store.apiError).not.toBeNull();
+
+    fetchMock = makeFetchMock();
+    vi.stubGlobal('fetch', fetchMock as unknown as typeof fetch);
+    store.open('s2');
+    expect(store.apiError).toBeNull();
+    await vi.waitFor(() => expect(calledUrls().length).toBeGreaterThan(0));
+    store.close();
+  });
+});
