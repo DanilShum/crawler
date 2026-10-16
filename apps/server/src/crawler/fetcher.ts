@@ -20,7 +20,16 @@ function classifyFetchError(err: unknown): string {
   const e = err as { code?: unknown; cause?: { code?: unknown }; name?: string };
   const code = e?.cause?.code !== undefined ? e.cause.code : e?.code;
   if (code === 'ENOTFOUND') return 'dns';
-  if (typeof code === 'string' && (code.startsWith('CERT_') || code === 'DEPTH_ZERO_SELF_SIGNED_CERT')) {
+  if (
+    typeof code === 'string' &&
+    // CERT_*: CERT_HAS_EXPIRED, CERT_ALTNAME_INVALID...;
+    // UNABLE_TO_*/SELF_SIGNED_*/DEPTH_ZERO_*: OpenSSL-коды без префикса CERT_
+    // (undici отдаёт их как cause.code при недоверенном/неполном сертификате)
+    (code.startsWith('CERT_') ||
+      code.startsWith('UNABLE_TO_') ||
+      code === 'DEPTH_ZERO_SELF_SIGNED_CERT' ||
+      code === 'SELF_SIGNED_CERT_IN_CHAIN')
+  ) {
     return 'ssl';
   }
   if (code === 'ABORT_ERR' || code === 'UND_ERR_CONNECT_TIMEOUT' || e?.name === 'AbortError' || e?.name === 'TimeoutError') {

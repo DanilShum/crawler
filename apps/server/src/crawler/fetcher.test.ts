@@ -1,5 +1,10 @@
+import { execFileSync } from 'node:child_process';
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { describe, it, expect, afterAll, beforeAll } from 'vitest';
 import { createServer, type Server, type IncomingMessage, type ServerResponse } from 'node:http';
+import { createServer as createHttpsServer, type Server as HttpsServer } from 'node:https';
 import { startTestSite } from '../test-helpers/test-site';
 import { HttpFetcher } from './fetcher';
 
@@ -29,6 +34,46 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await new Promise<void>((resolve) => proxy.close(() => resolve()));
+});
+
+describe('HttpFetcher классификация TLS-ошибок', () => {
+  it('неполная цепочка сертификатов (leaf без CA) даёт error "ssl"', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'fetcher-tls-'));
+    try {
+      const run = (args: string[]) => execFileSync('openssl', args, { stdio: 'pipe' });
+      // Корневой CA, которому Node не доверяет
+      run(['req', '-x509', '-newkey', 'rsa:2048', '-keyout', join(dir, 'ca.key'), '-out', join(dir, 'ca.crt'),
+        '-days', '1', '-nodes', '-subj', '/CN=fetcher-test-ca']);
+      // Leaf, подписанный CA; сервер отдаст только leaf без цепочки —
+      // Node не найдёт issuer и выдаст UNABLE_TO_GET_ISSUER_CERT_LOCALLY
+      run(['req', '-newkey', 'rsa:2048', '-keyout', join(dir, 'leaf.key'), '-out', join(dir, 'leaf.csr'),
+        '-nodes', '-subj', '/CN=127.0.0.1',
+        '-addext', 'subjectAltName=IP:127.0.0.1']);
+      run(['x509', '-req', '-in', join(dir, 'leaf.csr'), '-CA', join(dir, 'ca.crt'), '-CAkey', join(dir, 'ca.key'),
+        '-out', join(dir, 'leaf.crt'), '-days', '1', '-set_serial', '1']);
+
+      const prev = { ...process.env };
+      delete process.env.HTTP_PROXY; delete process.env.http_proxy;
+      delete process.env.HTTPS_PROXY; delete process.env.https_proxy;
+      const server: HttpsServer = createHttpsServer(
+        { key: readFileSync(join(dir, 'leaf.key')), cert: readFileSync(join(dir, 'leaf.crt')) },
+        (_req, res) => { res.end('ok'); },
+      );
+      try {
+        await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+        const { port } = server.address() as { port: number };
+        const f = new HttpFetcher();
+        const out = await f.fetch(`https://127.0.0.1:${port}/`, 5000);
+        expect(out.status).toBeNull();
+        expect(out.error).toBe('ssl');
+      } finally {
+        await new Promise<void>((resolve) => server.close(() => resolve()));
+        Object.assign(process.env, prev);
+      }
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
 });
 
 describe('HttpFetcher proxy support', () => {
