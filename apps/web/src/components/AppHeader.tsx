@@ -2,6 +2,7 @@ import { defineComponent } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import logoUrl from '../assets/spider-logo.svg';
+import { ROUTES } from '../router/routes';
 
 // Навигационная ссылка: RouterLink при установленном роутере,
 // обычный <a> — без него (например, в изолированном юнит-тесте).
@@ -27,17 +28,18 @@ export default defineComponent({
       localStorage.setItem('lang', lang);
       locale.value = lang;
     };
+    // пункты навигации — из того же конфига, что и маршруты
+    const navRoutes = ROUTES.filter((r) => r.navLabelKey !== undefined);
     return () => (
       <header class="app-header">
         <img class="app-logo" src={logoUrl} alt="" />
         <h1 class="app-title">{t('header.title')}</h1>
         <nav class="app-nav">
-          <Navlink to="/" data-test="nav-new-crawl">
-            {t('nav.newCrawl')}
-          </Navlink>
-          <Navlink to="/history" data-test="nav-history">
-            {t('nav.history')}
-          </Navlink>
+          {navRoutes.map((r) => (
+            <Navlink key={r.name} to={r.path} data-test={r.navDataTest}>
+              {t(r.navLabelKey!)}
+            </Navlink>
+          ))}
         </nav>
         <div class="lang-switch" role="group" aria-label={t('langSwitch')}>
           <button type="button" data-test="lang-ru" onClick={() => setLang('ru')}>
