@@ -211,6 +211,13 @@ export class Crawler {
       result.nofollow = meta.includes('nofollow');
       result.title = parsed.title;
       result.description = parsed.description;
+      result.openGraph = parsed.openGraph;
+      result.twitter = parsed.twitter;
+      result.hreflang = parsed.hreflang;
+      result.favicon = parsed.favicon;
+      result.wordCount = parsed.wordCount;
+      result.lang = parsed.lang;
+      result.headingOrder = parsed.headingOrder;
       for (const img of parsed.images) {
         const url = normalizeUrl(img.src, outcome.finalUrl);
         if (url) result.images.push({ url, alt: img.alt });
