@@ -1,9 +1,9 @@
-// apps/web/src/views/HistoryView.tsx
+// apps/web/src/views/history-view.tsx
 import { defineComponent, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 
-import { fetchCrawls, type SessionMeta } from '../api/client';
+import { fetchCrawls, type SessionMeta } from '../../api/client';
 
 const STATE_BADGE: Record<string, string> = {
   done: 'badge-ok',

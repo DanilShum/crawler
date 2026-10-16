@@ -1,16 +1,16 @@
-// apps/web/src/views/CrawlView.tsx
+// apps/web/src/views/crawl-view.tsx
 import { computed, defineComponent, onMounted, onUnmounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import type { Issue } from '@seo-crawler/shared';
 
-import ProgressDashboard from '../components/progress-dashboard';
-import ResultsTable from '../components/results-table';
-import PageDetails from '../components/page-details';
-import { useCrawlSession } from '../stores/crawl';
-import { TABS } from '../constants';
-import { exportUrl, stopCrawl } from '../api/client';
-import { ISSUE_LABELS } from '../constants';
+import ProgressDashboard from '../../components/progress-dashboard';
+import ResultsTable from '../../components/results-table';
+import PageDetails from '../../components/page-details';
+import { useCrawlSession } from '../../stores/crawl';
+import { TABS } from '../../constants';
+import { exportUrl, stopCrawl } from '../../api/client';
+import { ISSUE_LABELS } from '../../constants';
 
 export default defineComponent({
   name: 'CrawlView',

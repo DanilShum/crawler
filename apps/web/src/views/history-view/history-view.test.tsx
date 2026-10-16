@@ -1,14 +1,14 @@
-// apps/web/src/views/HistoryView.test.tsx
+// apps/web/src/views/history-view.test.tsx
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { mount, type VueWrapper } from '@vue/test-utils';
 import { defineComponent } from 'vue';
 import { createRouter, createMemoryHistory, type Router } from 'vue-router';
 import { createI18n } from 'vue-i18n';
 
-import HistoryView from './HistoryView';
-import type { SessionMeta } from '../api/client';
-import ru from '../locales/ru.json';
-import en from '../locales/en.json';
+import HistoryView from './history-view';
+import type { SessionMeta } from '../../api/client';
+import ru from '../../locales/ru.json';
+import en from '../../locales/en.json';
 
 const i18n = createI18n({ legacy: false, locale: 'ru', messages: { ru, en } });
 

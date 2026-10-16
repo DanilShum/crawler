@@ -14,19 +14,19 @@ export const ROUTES: AppRoute[] = [
   {
     path: '/',
     name: 'new-crawl',
-    component: () => import('../views/NewCrawlView'),
+    component: () => import('../views/new-crawl-view'),
     navLabelKey: 'nav.newCrawl',
     navDataTest: 'nav-new-crawl',
   },
   {
     path: '/crawl/:id',
     name: 'crawl',
-    component: () => import('../views/CrawlView'),
+    component: () => import('../views/crawl-view'),
   },
   {
     path: '/history',
     name: 'history',
-    component: () => import('../views/HistoryView'),
+    component: () => import('../views/history-view'),
     navLabelKey: 'nav.history',
     navDataTest: 'nav-history',
   },

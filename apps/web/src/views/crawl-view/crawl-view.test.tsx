@@ -1,4 +1,4 @@
-// apps/web/src/components/../views/CrawlView.test.tsx
+// apps/web/src/components/../views/crawl-view.test.tsx
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { mount, type VueWrapper } from '@vue/test-utils';
 import { createPinia, setActivePinia, type Pinia } from 'pinia';
@@ -6,11 +6,11 @@ import { createRouter, createMemoryHistory, type Router } from 'vue-router';
 import { createI18n } from 'vue-i18n';
 import type { Issue, PageResult } from '@seo-crawler/shared';
 
-import CrawlView from './CrawlView';
-import ProgressDashboard from '../components/progress-dashboard';
-import { useCrawlSession, type CrawlTab } from '../stores/crawl';
-import ru from '../locales/ru.json';
-import en from '../locales/en.json';
+import CrawlView from './crawl-view';
+import ProgressDashboard from '../../components/progress-dashboard';
+import { useCrawlSession, type CrawlTab } from '../../stores/crawl';
+import ru from '../../locales/ru.json';
+import en from '../../locales/en.json';
 
 const i18n = createI18n({ legacy: false, locale: 'ru', messages: { ru, en } });
 

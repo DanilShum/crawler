@@ -3,8 +3,8 @@ import { ref } from 'vue';
 import { defineStore } from 'pinia';
 import type { CrawlEvent, CrawlState, Issue, PageWithIssues } from '@seo-crawler/shared';
 
-import { fetchIssues, fetchPages } from '../api/client';
-import { PAGE_LIMIT } from '../constants';
+import { fetchIssues, fetchPages } from '../../api/client';
+import { PAGE_LIMIT } from '../../constants';
 
 export type CrawlTab = 'internal' | 'external' | 'images';
 
