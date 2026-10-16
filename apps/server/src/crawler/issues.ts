@@ -1,4 +1,4 @@
-import type { PageResult, Issue, IssueKind } from '@seo-crawler/shared';
+import type { PageResult, Issue, IssueKind, HeadingLevel } from '@seo-crawler/shared';
 
 const MAX_SAMPLES = 5;
 
@@ -13,6 +13,20 @@ interface Group {
  * таргет, отсутствующий в карте, неизвестен и не считается битым.
  * Возвращает только непустые группы, отсортированные по count убыванию.
  */
+/**
+ * Нарушение порядка заголовков: первый заголовок не h1 или
+ * переход на уровень больше предыдущего более чем на 1 (пропуск уровней).
+ */
+function isHeadingOrderBroken(order: HeadingLevel[]): boolean {
+  if (order.length === 0) return false;
+  const level = (h: HeadingLevel): number => Number(h[1]);
+  if (level(order[0]) !== 1) return true;
+  for (let i = 1; i < order.length; i++) {
+    if (level(order[i]) > level(order[i - 1]) + 1) return true;
+  }
+  return false;
+}
+
 export function computeIssues(results: PageResult[], linkStatuses: Map<string, number | null>): Issue[] {
   const groups = new Map<IssueKind, Group>();
 
@@ -61,6 +75,14 @@ export function computeIssues(results: PageResult[], linkStatuses: Map<string, n
 
     if (isHtml(r) && r.headings.h1.length === 0) add('missing-h1', r.url);
     if (isHtml(r) && r.images.some((i) => i.alt === null)) add('missing-alt', r.url);
+    if (isHtml(r)) {
+      if (r.openGraph === null || (r.openGraph.title === null && r.openGraph.description === null)) {
+        add('missing-og', r.url);
+      }
+      if (r.favicon === null) add('missing-favicon', r.url);
+      if (r.lang === null) add('missing-lang', r.url);
+      if (isHeadingOrderBroken(r.headingOrder)) add('heading-order', r.url);
+    }
     if (r.noindex) add('noindex', r.url);
   }
 

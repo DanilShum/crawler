@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import type { PageResult, Issue } from '@seo-crawler/shared';
+import type { PageResult, Issue, HeadingLevel } from '@seo-crawler/shared';
 import { computeIssues } from './issues';
 
 const BASE = 'https://site.test';
@@ -91,11 +91,11 @@ function byKind(issues: Issue[]): Map<string, Issue> {
 }
 
 describe('computeIssues', () => {
-  it('возвращает все 7 групп с верными count и sampleUrls', () => {
+  it('возвращает все 10 групп с верными count и sampleUrls', () => {
     const issues = computeIssues(makeResults(), linkStatuses());
     const by = byKind(issues);
 
-    expect(issues).toHaveLength(7);
+    expect(issues).toHaveLength(10);
 
     // broken-link: только страницы A и B, чьи исходящие ведут на 404;
     // страница D (статус 404) и её unfetched-ссылка не засчитываются
@@ -106,6 +106,10 @@ describe('computeIssues', () => {
     expect(by.get('missing-h1')).toEqual({ kind: 'missing-h1', count: 1, sampleUrls: [`${BASE}/c`] });
     expect(by.get('missing-alt')).toEqual({ kind: 'missing-alt', count: 3, sampleUrls: [`${BASE}/a`, `${BASE}/b`, `${BASE}/c`] });
     expect(by.get('noindex')).toEqual({ kind: 'noindex', count: 1, sampleUrls: [`${BASE}/c`] });
+    // новые проверки: A/B/C — HTML без og/favicon/lang; D — HTML 404, парсится и тоже без og/favicon/lang
+    expect(by.get('missing-og')).toEqual({ kind: 'missing-og', count: 4, sampleUrls: [`${BASE}/a`, `${BASE}/b`, `${BASE}/c`, `${BASE}/d`] });
+    expect(by.get('missing-favicon')).toEqual({ kind: 'missing-favicon', count: 4, sampleUrls: [`${BASE}/a`, `${BASE}/b`, `${BASE}/c`, `${BASE}/d`] });
+    expect(by.get('missing-lang')).toEqual({ kind: 'missing-lang', count: 4, sampleUrls: [`${BASE}/a`, `${BASE}/b`, `${BASE}/c`, `${BASE}/d`] });
   });
 
   it('сортирует по count убыванию, sampleUrls не длиннее 5', () => {
@@ -145,7 +149,8 @@ describe('computeIssues', () => {
     ];
     const issues = computeIssues(results, new Map());
 
-    expect(issues).toEqual([]);
+    // дубли отсутствуют; из новых проверок срабатывают missing-* (фикстура без og/favicon/lang)
+    expect(issues.map((i) => i.kind).sort()).toEqual(['missing-favicon', 'missing-lang', 'missing-og']);
   });
 
   it('missing-h1/missing-alt не считаются для не-HTML и ошибочных страниц', () => {
@@ -168,5 +173,49 @@ describe('computeIssues', () => {
 
     expect(by.get('missing-h1')).toEqual({ kind: 'missing-h1', count: 1, sampleUrls: [`${BASE}/html`] });
     expect(by.get('missing-alt')).toBeUndefined();
+  });
+});
+
+describe('новые проверки', () => {
+  it('missing-og: нет og:title и og:description', () => {
+    const issues = computeIssues([
+      page({ url: `${BASE}/1`, openGraph: null }),
+      page({ url: `${BASE}/2`, openGraph: { title: 'T', description: null, image: null, url: null } }), // есть title — ок
+      page({ url: `${BASE}/3`, openGraph: { title: null, description: 'D', image: null, url: null } }), // есть description
+    ], new Map());
+    expect(issues.find((i) => i.kind === 'missing-og')).toEqual({
+      kind: 'missing-og', count: 1, sampleUrls: [`${BASE}/1`],
+    });
+  });
+
+  it('missing-favicon и missing-lang', () => {
+    const issues = computeIssues([
+      page({ url: `${BASE}/1`, favicon: null, lang: null }),
+      page({ url: `${BASE}/2`, favicon: '/f.ico', lang: 'ru' }),
+    ], new Map());
+    expect(issues.find((i) => i.kind === 'missing-favicon')?.sampleUrls).toEqual([`${BASE}/1`]);
+    expect(issues.find((i) => i.kind === 'missing-lang')?.sampleUrls).toEqual([`${BASE}/1`]);
+  });
+
+  it.each([
+    [['h1', 'h2', 'h3'], false],          // порядок корректен
+    [['h1', 'h3', 'h4'], true],           // пропуск уровня
+    [['h2', 'h1'], true],                 // первый не h1
+    [[], false],                          // нет заголовков — не нарушение
+    [['h1', 'h1', 'h2'], false],          // повтор h1 — не про порядок
+  ])('heading-order для %j → %j', (order, expected) => {
+    const issues = computeIssues([page({ url: `${BASE}/1`, headingOrder: order as HeadingLevel[] })], new Map());
+    const found = issues.find((i) => i.kind === 'heading-order');
+    expect(found !== undefined).toBe(expected);
+  });
+
+  it('не-HTML и ошибочные страницы не попадают в новые проверки', () => {
+    const issues = computeIssues([
+      page({ url: `${BASE}/pdf`, contentType: 'application/pdf' }),
+      page({ url: `${BASE}/err`, status: null, error: 'connection', contentType: null }),
+    ], new Map());
+    expect(issues.filter((i) =>
+      ['missing-og', 'missing-favicon', 'missing-lang', 'heading-order'].includes(i.kind),
+    )).toEqual([]);
   });
 });
