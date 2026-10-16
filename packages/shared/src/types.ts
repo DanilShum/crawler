@@ -54,7 +54,11 @@ export interface PageResult {
 export type CrawlState = 'running' | 'done' | 'stopped';
 
 /** PageResult, обогащённый сервером списком проблем страницы (GET /pages). */
-export type PageWithIssues = PageResult & { issues: IssueKind[] };
+export type PageWithIssues = PageResult & {
+  issues: IssueKind[];
+  /** Битые ссылки страницы: URL → статус (null при сетевой ошибке). */
+  brokenLinks: { url: string; status: number | null }[];
+};
 
 export type IssueKind =
   | 'broken-link' | 'duplicate-title' | 'duplicate-description'

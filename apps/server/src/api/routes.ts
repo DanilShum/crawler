@@ -248,6 +248,13 @@ export function buildApp(deps: { sessions: SessionManager }): FastifyInstance {
     const withIssues = (p: PageResult): PageWithIssues => ({
       ...p,
       issues: ISSUE_KINDS.filter((k) => groupSets.get(k)!.has(p.url)),
+      // Битые ссылки с их статусами — фронтенд подсвечивает конкретные строки в списках ссылок
+      brokenLinks: [...p.internalLinks, ...p.externalLinks]
+        .filter((l) => {
+          const s = session.linkStatuses.get(l.url);
+          return s !== undefined && (s === null || s >= 400);
+        })
+        .map((l) => ({ url: l.url, status: session.linkStatuses.get(l.url) ?? null })),
     });
 
     const total = items.length;

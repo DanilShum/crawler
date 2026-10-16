@@ -43,7 +43,7 @@ function makePage(over: Partial<PageResult> = {}): PageWithIssues {
   lang: null,
   headingOrder: [],
   };
-  return { ...base, issues: [], ...over };
+  return { ...base, issues: [], brokenLinks: [], ...over };
 }
 
 function jsonResponse(body: unknown): Response {

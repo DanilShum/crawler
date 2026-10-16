@@ -375,3 +375,33 @@ describe('GET /pages: обогащение issues', () => {
     }
   });
 });
+
+describe('GET /pages: brokenLinks', () => {
+  it('каждый item содержит URL-ы битых ссылок страницы', async () => {
+    const site = await startTestSite();
+    try {
+      const { app, sessions } = newApp();
+      const start = await app.inject({
+        method: 'POST',
+        url: '/api/crawl',
+        payload: { startUrl: site.origin + '/', ...BASE },
+        headers: { 'content-type': 'application/json' },
+      });
+      const { id } = start.json();
+      await waitDone(sessions, id);
+
+      const res = await app.inject({ method: 'GET', url: `/api/crawl/${id}/pages` });
+      const body = res.json();
+      const home = body.items.find((p: { url: string }) => p.url === site.origin + '/');
+      // главная ведёт на /missing (404) и https://external.example/ (DNS-ошибка → status null)
+      expect(home.brokenLinks).toEqual([
+        { url: site.origin + '/missing', status: 404 },
+        { url: 'https://external.example/', status: null },
+      ]);
+      const about = body.items.find((p: { url: string }) => p.url.endsWith('/about'));
+      expect(about.brokenLinks).toEqual([]); // secret ссылка не fetch-нулась — не битая
+    } finally {
+      await site.close();
+    }
+  });
+});

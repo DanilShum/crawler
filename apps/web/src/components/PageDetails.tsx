@@ -5,6 +5,8 @@ import { type HeadingLevel, type IssueKind, type LinkInfo, type PageResult } fro
 
 import { ISSUE_LABELS } from '../issue-labels';
 
+type BrokenLink = { url: string; status: number | null };
+
 const HEADING_LEVELS: HeadingLevel[] = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
 
 function statusClass(page: PageResult): string {
@@ -20,17 +22,26 @@ function formatBytes(n: number): string {
   return `${(n / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-function renderLinks(links: LinkInfo[]) {
+function renderLinks(links: LinkInfo[], broken: BrokenLink[], t: (k: string) => string) {
   if (links.length === 0) return <p class="pd-muted">—</p>;
+  const brokenBy = (url: string): BrokenLink | undefined => broken.find((b) => b.url === url);
   return (
     <ul class="pd-list">
-      {links.map((l, i) => (
-        <li key={i}>
-          <span class="mono pd-url-sm">{l.url}</span>
-          {l.anchor !== null ? <span class="pd-muted"> ({l.anchor})</span> : null}
-          {l.rel !== null ? <span class="pd-muted"> [{l.rel}]</span> : null}
-        </li>
-      ))}
+      {links.map((l, i) => {
+        const b = brokenBy(l.url);
+        return (
+          <li key={i} data-test="link-item">
+            <span class="mono pd-url-sm">{l.url}</span>
+            {l.anchor !== null ? <span class="pd-muted"> ({l.anchor})</span> : null}
+            {l.rel !== null ? <span class="pd-muted"> [{l.rel}]</span> : null}
+            {b !== undefined ? (
+              <span class="badge badge-error pd-alt" data-test="link-broken">
+                {b.status !== null ? b.status : t('table.error')}
+              </span>
+            ) : null}
+          </li>
+        );
+      })}
     </ul>
   );
 }
@@ -47,6 +58,11 @@ export default defineComponent({
       required: false,
       default: () => [],
     },
+    brokenLinks: {
+      type: Array as PropType<BrokenLink[]>,
+      required: false,
+      default: () => [],
+    },
     onClose: {
       type: Function as PropType<() => void>,
       required: false,
@@ -58,6 +74,8 @@ export default defineComponent({
     const statusText = computed(() =>
       props.page.status !== null ? String(props.page.status) : (props.page.error ?? t('details.error')),
     );
+
+    const has = (kind: IssueKind): boolean => props.issues.includes(kind);
 
     return () => (
       <aside class="page-details" data-test="page-details">
@@ -142,7 +160,14 @@ export default defineComponent({
               <dt>{t('details.wordCount')}</dt>
               <dd data-test="details-wordcount">{props.page.wordCount}</dd>
               <dt>{t('details.lang')}</dt>
-              <dd data-test="details-lang">{props.page.lang ?? '—'}</dd>
+              <dd data-test="details-lang">
+                {props.page.lang ?? '—'}
+                {has('missing-lang') ? (
+                  <span class="badge badge-error pd-alt" data-test="field-issue-missing-lang">
+                    {t(ISSUE_LABELS['missing-lang'])}
+                  </span>
+                ) : null}
+              </dd>
             </dl>
           </div>
 
@@ -162,7 +187,19 @@ export default defineComponent({
           </div>
 
           <div class="pd-section">
-            <h4>{t('details.headings')}</h4>
+            <h4>
+              {t('details.headings')}
+              {has('missing-h1') ? (
+                <span class="badge badge-error pd-alt" data-test="section-issue-missing-h1">
+                  {t(ISSUE_LABELS['missing-h1'])}
+                </span>
+              ) : null}
+              {has('heading-order') ? (
+                <span class="badge badge-warn pd-alt" data-test="section-issue-heading-order">
+                  {t(ISSUE_LABELS['heading-order'])}
+                </span>
+              ) : null}
+            </h4>
             {HEADING_LEVELS.map((level) =>
               props.page.headings[level].length > 0 ? (
                 <div class="pd-heading" key={level} data-test={`heading-${level}`}>
@@ -203,12 +240,12 @@ export default defineComponent({
 
           <div class="pd-section">
             <h4>{t('details.internalLinks')}</h4>
-            {renderLinks(props.page.internalLinks)}
+            {renderLinks(props.page.internalLinks, props.brokenLinks, t)}
           </div>
 
           <div class="pd-section">
             <h4>{t('details.externalLinks')}</h4>
-            {renderLinks(props.page.externalLinks)}
+            {renderLinks(props.page.externalLinks, props.brokenLinks, t)}
           </div>
 
           <div class="pd-section">
@@ -219,7 +256,14 @@ export default defineComponent({
           </div>
 
           <div class="pd-section">
-            <h4>{t('details.og')}</h4>
+            <h4>
+              {t('details.og')}
+              {has('missing-og') ? (
+                <span class="badge badge-error pd-alt" data-test="section-issue-missing-og">
+                  {t(ISSUE_LABELS['missing-og'])}
+                </span>
+              ) : null}
+            </h4>
             {props.page.openGraph === null ? (
               <p class="pd-muted" data-test="details-og-empty">—</p>
             ) : (
@@ -270,7 +314,14 @@ export default defineComponent({
           </div>
 
           <div class="pd-section">
-            <h4>{t('details.favicon')}</h4>
+            <h4>
+              {t('details.favicon')}
+              {has('missing-favicon') ? (
+                <span class="badge badge-error pd-alt" data-test="section-issue-missing-favicon">
+                  {t(ISSUE_LABELS['missing-favicon'])}
+                </span>
+              ) : null}
+            </h4>
             {props.page.favicon === null ? (
               <p class="pd-muted">—</p>
             ) : (

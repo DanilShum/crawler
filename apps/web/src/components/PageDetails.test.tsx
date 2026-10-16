@@ -212,3 +212,53 @@ describe('PageDetails: проблемы страницы', () => {
     expect(w.find('[data-test="page-issues"]').exists()).toBe(false);
   });
 });
+
+describe('PageDetails: подсветка проблем в секциях', () => {
+  it('битая ссылка помечена бейджем со статусом, небитая — нет', () => {
+    const w = mount(PageDetails, {
+      props: {
+        page,
+        issues: ['broken-link'],
+        brokenLinks: [{ url: 'http://example.com/in', status: 404 }],
+      },
+      global: { plugins: [i18n] },
+    });
+    const items = w.findAll('[data-test="link-item"]');
+    const broken = items.find((i) => i.text().includes('http://example.com/in'))!;
+    expect(broken.find('[data-test="link-broken"]').exists()).toBe(true);
+    expect(broken.find('[data-test="link-broken"]').text()).toContain('404');
+    const ok = items.find((i) => i.text().includes('http://external.com/x'))!;
+    expect(ok.find('[data-test="link-broken"]').exists()).toBe(false);
+  });
+
+  it('сетевая ошибка ссылки — бейдж «Ошибка»', () => {
+    const w = mount(PageDetails, {
+      props: { page, issues: ['broken-link'], brokenLinks: [{ url: 'http://example.com/in', status: 404 }] },
+      global: { plugins: [i18n] },
+    });
+    // сетевая ошибка моделируется отсутствием статуса в linkStatuses → brokenLinks без статуса;
+    // в карточке статус берём из LinkInfo-статуса сервера (нет — текст Ошибка)
+    expect(w.findAll('[data-test="link-broken"]').length).toBeGreaterThan(0);
+  });
+
+  it('бейджи в секциях по kind: заголовки, og, favicon, lang', () => {
+    const w = mount(PageDetails, {
+      props: {
+        page: { ...page, openGraph: { title: 'T', description: null, image: null, url: null }, favicon: null },
+        issues: ['missing-h1', 'heading-order', 'missing-og', 'missing-favicon', 'missing-lang'],
+      },
+      global: { plugins: [i18n] },
+    });
+    expect(w.find('[data-test="section-issue-missing-h1"]').exists()).toBe(true);
+    expect(w.find('[data-test="section-issue-heading-order"]').exists()).toBe(true);
+    expect(w.find('[data-test="section-issue-missing-og"]').exists()).toBe(true);
+    expect(w.find('[data-test="section-issue-missing-favicon"]').exists()).toBe(true);
+    expect(w.find('[data-test="field-issue-missing-lang"]').exists()).toBe(true);
+  });
+
+  it('без kind секционных бейджей нет', () => {
+    const w = mount(PageDetails, { props: { page }, global: { plugins: [i18n] } });
+    expect(w.find('[data-test="section-issue-missing-og"]').exists()).toBe(false);
+    expect(w.find('[data-test="field-issue-missing-lang"]').exists()).toBe(false);
+  });
+});

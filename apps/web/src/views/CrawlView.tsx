@@ -123,6 +123,7 @@ export default defineComponent({
             <PageDetails
               page={selectedPage.value}
               issues={selectedPage.value.issues}
+              brokenLinks={selectedPage.value.brokenLinks}
               onClose={() => {
                 store.selectedUrl = null;
               }}
