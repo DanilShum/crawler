@@ -724,6 +724,11 @@ pre,
   padding: 8px 10px;
 }
 
+.pd-favicon {
+  max-width: 32px;
+  max-height: 32px;
+}
+
 /* --- экспорт CSV ------------------------------------------------------------ */
 
 .crawl-toolbar {

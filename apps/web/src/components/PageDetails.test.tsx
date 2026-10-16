@@ -148,3 +148,35 @@ describe('PageDetails', () => {
     expect(wrapper.find('[data-test="schema-pre"]').text()).toContain('[]');
   });
 });
+
+describe('PageDetails: обогащённые данные', () => {
+  const enriched = {
+    ...page,
+    openGraph: { title: 'OG Title', description: 'OG Desc', image: 'https://s.example/og.png', url: 'https://s.example/' },
+    twitter: { card: 'summary_large_image', title: null, description: null, image: null },
+    hreflang: [{ lang: 'en', href: 'https://s.example/en/' }],
+    favicon: '/favicon.ico',
+    wordCount: 322,
+    lang: 'ru',
+  };
+
+  it('рендерит блоки OG/Twitter/hreflang/favicon/wordCount/lang', () => {
+    const w = mount(PageDetails, { props: { page: enriched }, global: { plugins: [i18n] } });
+    expect(w.text()).toContain('OG Title');
+    expect(w.text()).toContain('OG Desc');
+    expect(w.text()).toContain('summary_large_image');
+    expect(w.text()).toContain('en=https://s.example/en/');
+    expect(w.find('img[data-test="details-favicon"]').exists()).toBe(true);
+    expect(w.find('[data-test="details-wordcount"]').text()).toBe('322');
+    expect(w.find('[data-test="details-lang"]').text()).toBe('ru');
+  });
+
+  it('прочерки при отсутствии данных', () => {
+    const w = mount(PageDetails, {
+      props: { page: { ...page, openGraph: null, twitter: null, hreflang: [], favicon: null, lang: null } },
+      global: { plugins: [i18n] },
+    });
+    expect(w.findAll('[data-test="details-og-empty"]').length).toBeGreaterThan(0);
+    expect(w.find('img[data-test="details-favicon"]').exists()).toBe(false);
+  });
+});

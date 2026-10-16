@@ -60,6 +60,7 @@
     "prev": "Prev",
     "next": "Next",
     "error": "Error",
+    "wordCount": "Words",
     "empty": "No pages to display"
   },
   "details": {
@@ -87,6 +88,13 @@
     "internalLinks": "Internal links",
     "externalLinks": "External links",
     "schema": "Schema.org",
+    "og": "Open Graph",
+    "twitter": "Twitter",
+    "hreflang": "Hreflang",
+    "favicon": "Favicon",
+    "wordCount": "Words",
+    "lang": "Language",
+    "ogNone": "Not set",
     "noindex": "noindex",
     "nofollow": "nofollow"
   },
@@ -112,6 +120,10 @@
     "duplicateH1": "Duplicate H1",
     "missingH1": "Missing H1",
     "missingAlt": "Images without alt",
+    "missingOg": "Missing Open Graph",
+    "missingFavicon": "No favicon",
+    "missingLang": "Missing lang",
+    "headingOrder": "Broken heading order",
     "noindex": "noindex",
     "empty": "No issues found"
   }

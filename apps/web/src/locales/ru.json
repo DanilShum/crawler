@@ -60,6 +60,7 @@
     "prev": "Назад",
     "next": "Вперёд",
     "error": "Ошибка",
+    "wordCount": "Слов",
     "empty": "Нет страниц для отображения"
   },
   "details": {
@@ -87,6 +88,13 @@
     "internalLinks": "Внутренние ссылки",
     "externalLinks": "Внешние ссылки",
     "schema": "Schema.org",
+    "og": "Open Graph",
+    "twitter": "Twitter",
+    "hreflang": "Hreflang",
+    "favicon": "Favicon",
+    "wordCount": "Слов",
+    "lang": "Язык",
+    "ogNone": "Не задано",
     "noindex": "noindex",
     "nofollow": "nofollow"
   },
@@ -113,6 +121,10 @@
     "missingH1": "Отсутствует H1",
     "missingAlt": "Картинки без alt",
     "noindex": "noindex",
+    "missingOg": "Отсутствует Open Graph",
+    "missingFavicon": "Отсутствует favicon",
+    "missingLang": "Отсутствует lang",
+    "headingOrder": "Нарушен порядок заголовков",
     "empty": "Проблем не найдено"
   }
 }

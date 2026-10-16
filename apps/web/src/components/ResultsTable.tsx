@@ -128,6 +128,7 @@ export default defineComponent({
               {header('noindex', 'table.indexability')}
               {header('depth', 'table.depth')}
               {header('contentType', 'table.contentType')}
+              <th data-test="th-wordCount">{t('table.wordCount')}</th>
             </tr>
           </thead>
           <tbody>
@@ -168,6 +169,7 @@ export default defineComponent({
                   <td class="type-cell" data-test="cell-content-type">
                     {page.contentType ?? '—'}
                   </td>
+                  <td data-test="cell-wordcount">{page.wordCount}</td>
                 </tr>
               ))
             )}

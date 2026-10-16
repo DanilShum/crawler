@@ -121,6 +121,10 @@ export default defineComponent({
             <dd data-test="meta-rendered">
               {props.page.rendered ? t('details.yes') : t('details.no')}
             </dd>
+            <dt>{t('details.wordCount')}</dt>
+            <dd data-test="details-wordcount">{props.page.wordCount}</dd>
+            <dt>{t('details.lang')}</dt>
+            <dd data-test="details-lang">{props.page.lang ?? '—'}</dd>
           </dl>
         </div>
 
@@ -194,6 +198,72 @@ export default defineComponent({
           <pre class="pd-pre" data-test="schema-pre">
             {JSON.stringify(props.page.schemaOrg, null, 2)}
           </pre>
+        </div>
+
+        <div class="pd-section">
+          <h4>{t('details.og')}</h4>
+          {props.page.openGraph === null ? (
+            <p class="pd-muted" data-test="details-og-empty">—</p>
+          ) : (
+            <dl class="pd-kv">
+              <dt>title</dt>
+              <dd>{props.page.openGraph.title ?? '—'}</dd>
+              <dt>description</dt>
+              <dd>{props.page.openGraph.description ?? '—'}</dd>
+              <dt>image</dt>
+              <dd class="mono pd-url-sm">{props.page.openGraph.image ?? '—'}</dd>
+              <dt>url</dt>
+              <dd class="mono pd-url-sm">{props.page.openGraph.url ?? '—'}</dd>
+            </dl>
+          )}
+        </div>
+
+        <div class="pd-section">
+          <h4>{t('details.twitter')}</h4>
+          {props.page.twitter === null ? (
+            <p class="pd-muted" data-test="details-og-empty">{t('details.ogNone')}</p>
+          ) : (
+            <dl class="pd-kv">
+              <dt>card</dt>
+              <dd>{props.page.twitter.card ?? '—'}</dd>
+              <dt>title</dt>
+              <dd>{props.page.twitter.title ?? '—'}</dd>
+              <dt>description</dt>
+              <dd>{props.page.twitter.description ?? '—'}</dd>
+              <dt>image</dt>
+              <dd class="mono pd-url-sm">{props.page.twitter.image ?? '—'}</dd>
+            </dl>
+          )}
+        </div>
+
+        <div class="pd-section">
+          <h4>{t('details.hreflang')}</h4>
+          {props.page.hreflang.length === 0 ? (
+            <p class="pd-muted">—</p>
+          ) : (
+            <ul class="pd-list">
+              {props.page.hreflang.map((h, i) => (
+                <li key={i} class="mono pd-url-sm">
+                  {`${h.lang}=${h.href}`}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        <div class="pd-section">
+          <h4>{t('details.favicon')}</h4>
+          {props.page.favicon === null ? (
+            <p class="pd-muted">—</p>
+          ) : (
+            <img
+              data-test="details-favicon"
+              class="pd-favicon"
+              src={props.page.favicon}
+              alt=""
+              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+            />
+          )}
         </div>
       </aside>
     );

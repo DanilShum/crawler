@@ -184,3 +184,11 @@ describe('ResultsTable', () => {
     expect(wrapper.find('[data-test="prev-page"]').attributes('disabled')).toBeUndefined();
   });
 });
+
+describe('ResultsTable: колонка слов', () => {
+  it('рендерит wordCount', () => {
+    const { wrapper } = mountTable([makePage({ wordCount: 322 })]);
+    expect(wrapper.find('[data-test="th-wordCount"]').exists()).toBe(true);
+    expect(wrapper.find('[data-test="cell-wordcount"]').text()).toBe('322');
+  });
+});
