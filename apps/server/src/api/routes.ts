@@ -3,6 +3,7 @@ import type { FastifyInstance } from 'fastify';
 import { TooManySessionsError } from '../session/session-manager';
 import type { SessionManager } from '../session/session-manager';
 import { toCsv } from '../export/csv';
+import { isHeadingOrderBroken } from '../crawler/issues';
 import type { CrawlOptions, IssueKind, PageResult } from '@seo-crawler/shared';
 
 const MODES = ['spider', 'list', 'sitemap'] as const;
@@ -10,6 +11,7 @@ const TABS = ['internal', 'external', 'images'] as const;
 const ISSUE_KINDS: IssueKind[] = [
   'broken-link', 'duplicate-title', 'duplicate-description',
   'duplicate-h1', 'missing-h1', 'missing-alt', 'noindex',
+  'missing-og', 'missing-favicon', 'missing-lang', 'heading-order',
 ];
 
 type Parsed<T> = { ok: true; value: T } | { ok: false; message: string };
@@ -91,7 +93,8 @@ function parseCrawlOptions(input: unknown): Parsed<CrawlOptions> {
  * Множество URL страниц, входящих в группу проблемы — по тем же правилам, что computeIssues,
  * но с полным охватом (sampleUrls из Issue содержат только до 5 примеров).
  */
-function pagesInIssueGroup(
+/** Множество URL, попадающих в группу отчёта (используется фильтром GET /pages?issue=). */
+export function pagesInIssueGroup(
   results: PageResult[],
   linkStatuses: Map<string, number | null>,
   kind: IssueKind,
@@ -143,6 +146,21 @@ function pagesInIssueGroup(
         break;
       case 'noindex':
         hit = p.noindex;
+        break;
+      // Новые проверки — только для загруженных HTML (семантика issues.ts);
+      // не-HTML и ошибочные страницы экстракция не касалась.
+      case 'missing-og':
+        hit = p.status !== null && (p.contentType ?? '').startsWith('text/html')
+          && (p.openGraph === null || (p.openGraph.title === null && p.openGraph.description === null));
+        break;
+      case 'missing-favicon':
+        hit = p.status !== null && (p.contentType ?? '').startsWith('text/html') && p.favicon === null;
+        break;
+      case 'missing-lang':
+        hit = p.status !== null && (p.contentType ?? '').startsWith('text/html') && p.lang === null;
+        break;
+      case 'heading-order':
+        hit = p.status !== null && (p.contentType ?? '').startsWith('text/html') && isHeadingOrderBroken(p.headingOrder);
         break;
     }
     if (hit) out.add(p.url);

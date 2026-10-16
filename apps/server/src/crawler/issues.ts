@@ -17,7 +17,7 @@ interface Group {
  * Нарушение порядка заголовков: первый заголовок не h1 или
  * переход на уровень больше предыдущего более чем на 1 (пропуск уровней).
  */
-function isHeadingOrderBroken(order: HeadingLevel[]): boolean {
+export function isHeadingOrderBroken(order: HeadingLevel[]): boolean {
   if (order.length === 0) return false;
   const level = (h: HeadingLevel): number => Number(h[1]);
   if (level(order[0]) !== 1) return true;

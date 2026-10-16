@@ -1,5 +1,6 @@
 import { describe, it, expect, afterEach } from 'vitest';
-import { buildApp } from './routes';
+import { buildApp, pagesInIssueGroup } from './routes';
+import type { PageResult } from '@seo-crawler/shared';
 import { SessionManager } from '../session/session-manager';
 import { startTestSite } from '../test-helpers/test-site';
 import { createNoNetworkFetcher } from '../test-helpers/no-network-fetcher';
@@ -155,6 +156,29 @@ describe('crawl API routes', () => {
     }
   });
 
+  it('GET pages?issue=missing-lang фильтрует (не 400): фикстура без <html lang>', async () => {
+    const site = await startTestSite();
+    try {
+      const { app, sessions } = newApp();
+      const start = await app.inject({
+        method: 'POST',
+        url: '/api/crawl',
+        payload: { startUrl: site.origin + '/', ...BASE },
+        headers: { 'content-type': 'application/json' },
+      });
+      const { id } = start.json();
+      await waitDone(sessions, id);
+
+      const res = await app.inject({ method: 'GET', url: `/api/crawl/${id}/pages?issue=missing-lang` });
+      expect(res.statusCode).toBe(200);
+      const body = res.json();
+      expect(body.total).toBeGreaterThan(0);
+      expect(body.items.every((p: { lang: string | null }) => p.lang === null)).toBe(true);
+    } finally {
+      await site.close();
+    }
+  });
+
   it('GET /api/crawls содержит созданную сессию', async () => {
     const site = await startTestSite();
     try {
@@ -278,5 +302,46 @@ describe('crawl API routes', () => {
     const res = await app.inject({ method: 'GET', url: '/api/crawl/nope/pages' });
     expect(res.statusCode).toBe(404);
     expect(res.json()).toMatchObject({ error: 'NOT_FOUND' });
+  });
+});
+
+describe('pagesInIssueGroup: новые kind', () => {
+  function page(over: Partial<PageResult> & { url: string }): PageResult {
+    return {
+      status: 200, error: null, contentType: 'text/html', depth: 0,
+      fetchedAt: '2026-01-01T00:00:00.000Z', responseTimeMs: 10, sizeBytes: 100, rendered: false,
+      title: null, description: null, metaRobots: null, canonical: null,
+      headings: { h1: [], h2: [], h3: [], h4: [], h5: [], h6: [] },
+      images: [], internalLinks: [], externalLinks: [], schemaOrg: [],
+      noindex: false, nofollow: false, redirectChain: [],
+      openGraph: null, twitter: null, hreflang: [], favicon: null,
+      wordCount: 0, lang: null, headingOrder: [],
+      ...over,
+    };
+  }
+
+  it('missing-og: только страницы без og:title и og:description', () => {
+    const set = pagesInIssueGroup([
+      page({ url: 'http://a/1' }),
+      page({ url: 'http://a/2', openGraph: { title: 'T', description: null, image: null, url: null } }),
+    ], new Map(), 'missing-og');
+    expect(set).toEqual(new Set(['http://a/1']));
+  });
+
+  it('missing-favicon и missing-lang', () => {
+    const results = [
+      page({ url: 'http://a/1' }),
+      page({ url: 'http://a/2', favicon: '/f.ico', lang: 'ru' }),
+    ];
+    expect(pagesInIssueGroup(results, new Map(), 'missing-favicon')).toEqual(new Set(['http://a/1']));
+    expect(pagesInIssueGroup(results, new Map(), 'missing-lang')).toEqual(new Set(['http://a/1']));
+  });
+
+  it('heading-order: h2 первым — нарушение', () => {
+    const set = pagesInIssueGroup([
+      page({ url: 'http://a/1', headingOrder: ['h2', 'h1'] }),
+      page({ url: 'http://a/2', headingOrder: ['h1', 'h2'] }),
+    ], new Map(), 'heading-order');
+    expect(set).toEqual(new Set(['http://a/1']));
   });
 });
