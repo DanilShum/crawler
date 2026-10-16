@@ -8,6 +8,7 @@
   },
   "scripts": {
     "test": "npm run test --workspaces --if-present",
+    "dev": "node scripts/dev.mjs",
     "dev:web": "npm run dev -w @seo-crawler/web",
     "dev:server": "npm run dev -w @seo-crawler/server",
     "build:web": "npm run build -w @seo-crawler/web"
