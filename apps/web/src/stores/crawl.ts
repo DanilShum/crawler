@@ -4,6 +4,7 @@ import { defineStore } from 'pinia';
 import type { CrawlEvent, CrawlState, Issue, PageWithIssues } from '@seo-crawler/shared';
 
 import { fetchIssues, fetchPages } from '../api/client';
+import { PAGE_LIMIT } from '../constants';
 
 export type CrawlTab = 'internal' | 'external' | 'images';
 
@@ -16,8 +17,6 @@ export interface CrawlProgress {
 
 const RECONNECT_DELAY_MS = 2000;
 const MAX_RECONNECT_ATTEMPTS = 5;
-const PAGE_LIMIT = 50;
-
 const emptyProgress = (): CrawlProgress => ({ state: 'running', crawled: 0, queued: 0, errors: 0 });
 
 export const useCrawlSession = defineStore('crawl-session', () => {

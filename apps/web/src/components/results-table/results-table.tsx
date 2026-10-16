@@ -1,14 +1,12 @@
-// apps/web/src/components/results-table.tsx
+// apps/web/src/components/results-table/results-table.tsx
 import { computed, defineComponent, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import type { PageResult } from '@seo-crawler/shared';
+import type { PageResult, PageWithIssues } from '@seo-crawler/shared';
 
 import { useCrawlSession } from '../../stores/crawl';
 import { statusClass } from '../../helpers';
+import { COLUMNS, PAGE_LIMIT, type SortKey } from '../../constants';
 
-const PAGE_LIMIT = 50;
-
-type SortKey = 'url' | 'status' | 'title' | 'h1' | 'noindex' | 'depth' | 'contentType';
 type SortDir = 'asc' | 'desc';
 
 function sortValue(page: PageResult, key: SortKey): string | number {
@@ -27,6 +25,8 @@ function sortValue(page: PageResult, key: SortKey): string | number {
       return page.depth;
     case 'contentType':
       return page.contentType ?? '';
+    case 'wordCount':
+      return page.wordCount;
   }
 }
 
@@ -94,6 +94,47 @@ export default defineComponent({
       </th>
     );
 
+    // ячейка по конфигу колонки; статус и noindex — бейджи, остальные — текст
+    const cell = (page: PageWithIssues, col: (typeof COLUMNS)[number]) => {
+      const attrs = {
+        key: col.key,
+        class: col.cellClass,
+        'data-test': col.cellDataTest,
+      };
+      if (col.key === 'status') {
+        return (
+          <td {...attrs}>
+            <span class={`badge ${statusClass(page)}`} data-test="status-badge">
+              {page.status !== null ? String(page.status) : (page.error ?? t('table.error'))}
+            </span>
+          </td>
+        );
+      }
+      if (col.key === 'noindex') {
+        return (
+          <td {...attrs}>
+            {page.noindex ? (
+              <span class="badge badge-error" data-test="badge-noindex">
+                {t('table.noindex')}
+              </span>
+            ) : null}
+          </td>
+        );
+      }
+      const text: Record<SortKey, string | number> = {
+        url: page.url,
+        title: page.title ?? '—',
+        h1: page.headings.h1[0] ?? '—',
+        depth: page.depth,
+        contentType: page.contentType ?? '—',
+        wordCount: page.wordCount,
+        // служебные ключи выше отрендерились спец-ветками
+        status: '',
+        noindex: '',
+      };
+      return <td {...attrs}>{text[col.key]}</td>;
+    };
+
     return () => (
       <div class="results-panel">
         <div class="table-toolbar">
@@ -116,20 +157,17 @@ export default defineComponent({
           <table class="results-table">
             <thead>
               <tr>
-                {header('url', 'table.url')}
-                {header('status', 'table.status')}
-                {header('title', 'table.title')}
-                {header('h1', 'table.h1')}
-                {header('noindex', 'table.indexability')}
-                {header('depth', 'table.depth')}
-                {header('contentType', 'table.contentType')}
-                <th data-test="th-wordCount">{t('table.wordCount')}</th>
+                {COLUMNS.map((col) =>
+                  col.sortable
+                    ? <th key={col.key} data-test={col.dataTest} onClick={() => toggleSort(col.key)}>{t(col.labelKey)}{mark(col.key)}</th>
+                    : <th key={col.key} data-test={col.dataTest}>{t(col.labelKey)}</th>,
+                )}
               </tr>
             </thead>
             <tbody>
               {rows.value.length === 0 ? (
                 <tr>
-                  <td class="table-empty" colspan={7}>
+                  <td class="table-empty" colspan={COLUMNS.length}>
                     {t('table.empty')}
                   </td>
                 </tr>
@@ -143,28 +181,7 @@ export default defineComponent({
                       store.selectedUrl = page.url;
                     }}
                   >
-                    <td class="url-cell" data-test="cell-url">
-                      {page.url}
-                    </td>
-                    <td>
-                      <span class={`badge ${statusClass(page)}`} data-test="status-badge">
-                        {page.status !== null ? String(page.status) : (page.error ?? t('table.error'))}
-                      </span>
-                    </td>
-                    <td data-test="cell-title">{page.title ?? '—'}</td>
-                    <td data-test="cell-h1">{page.headings.h1[0] ?? '—'}</td>
-                    <td>
-                      {page.noindex ? (
-                        <span class="badge badge-error" data-test="badge-noindex">
-                          {t('table.noindex')}
-                        </span>
-                      ) : null}
-                    </td>
-                    <td data-test="cell-depth">{page.depth}</td>
-                    <td class="type-cell" data-test="cell-content-type">
-                      {page.contentType ?? '—'}
-                    </td>
-                    <td data-test="cell-wordcount">{page.wordCount}</td>
+                    {COLUMNS.map((col) => cell(page, col))}
                   </tr>
                 ))
               )}
